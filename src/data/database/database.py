@@ -174,19 +174,6 @@ class Database:
             if target_row_values:
                 return dict(zip(self.schema, target_row_values))
         return None
-    
-    def get_all(self) -> list:
-        """Retorna todos os registros ativos (não deletados).
-
-        :return: Lista de dicionários representando os registros.
-        """
-        records = []
-        with open(self.data_path, 'r', newline='') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if int(row.get('deleted', 0)) == 0:
-                    records.append(row)
-        return records
 
     def update(self, key: str, updates: dict):
         """Atualiza um registro. Requer reescrita do arquivo.

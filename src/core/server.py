@@ -4,12 +4,17 @@ import os
 
 class Server:
     """Classe para gerenciar um servidor de jogos."""
-    def __init__(self, name):
+    def __init__(self, name, properties_dict=None):
         self.name = name
         self.version = "1.8"
         self.path = name
         self.process = None
         self.running = False
+        self.properties_dict = properties_dict
+    
+    @staticmethod
+    def server_exists(name) -> bool:
+        return os.path.exists(name)
 
     def __enter__(self):
         os.makedirs(self.path, exist_ok=True)

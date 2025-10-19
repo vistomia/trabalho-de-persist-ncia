@@ -1,24 +1,25 @@
-import database
+from data.database import Database
 import bcrypt
+import hashlib
 
 class User:
     def __init__(self):
-        with database.Database(
-            data_path="store/user_data.csv",
-            index_path="store/user_index.seq",
+        self.db = Database(
+            data_path="data/store/user_data.csv",
+            index_path="data/store/user_index.seq",
             key_column="username",
-            schema=["username", "password_hash"]
-        ) as db:
-            self.db = db
+            schema=["username", "password_hash", "token"]
+        )
 
     def insert(self, user_data: dict):
         password_bytes = user_data['password'].encode('utf-8')
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(password_bytes, salt)
-
+        token = hashlib.sha256(f"{user_data['username']}{hash(hashed_password.decode('utf-8'))}".encode()).hexdigest()
         self.db.insert({
                 "username": user_data['username'], 
-                "password_hash": hashed_password.decode('utf-8')
+                "password_hash": hashed_password.decode('utf-8'),
+                "token": token
                 })
     
     def get(self, username: str) -> dict | None:

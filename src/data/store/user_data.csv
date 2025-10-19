@@ -1,3 +1,2 @@
-id,name,motd,version,deleted
-1,Alice,"Hello, world!",1.0,0
-2,Alice,"Hello, world!",1.0,0
+username,password_hash,token,deleted
+victor,$2b$12$/lxl9CENr8sxVeedq39OI.sEC1xgQ1QRxKJxRyYvZlsI77jUPfYjK,f6cd42767ffccdc1c88cf63593b2f3ed4dc382d75d7a9850bc57512b9bd56575,0

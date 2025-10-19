@@ -1,0 +1,2 @@
+id,name,motd,version,slots,difficulty,online-mode,enable-command-block,spawn-monsters,force-gamemode,gamemode,white-list,pvp,allow-flight,allow-nether,spawn-protection,deleted
+1,Mundo de Aventuras,Bem-vindo ao nosso servidor! Sobreviva e construa.,1.20.1,20,normal,True,False,True,False,survival,False,True,False,True,16,0
