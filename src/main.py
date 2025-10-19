@@ -28,8 +28,8 @@ def login_user(user: UserModel, response: fastapi.Response):
     else:
         raise fastapi.HTTPException(status_code=401, detail="Invalid username or password.")
 
-@app.get("/users")
-def get_all_users(request: fastapi.Request):
+@app.get("/user")
+def get_user(request: fastapi.Request,):
     token = request.cookies.get("token")    
 
     if not token:
@@ -38,8 +38,7 @@ def get_all_users(request: fastapi.Request):
     if token != "1":
         raise fastapi.HTTPException(status_code=401, detail="Invalid token.")
     
-    users = controller_instance.get_all_users()
-    return {"users": users}
+    return {"user": user}
 
 @app.get("/users/count")
 def count_users():
@@ -48,18 +47,23 @@ def count_users():
 
 @app.get("/user/{username}")
 def get_user(username: str):
-    user = controller_instance.user_repo.get(username)
+    user = controller_instance.get_user(username)
     if user:
         return {"user": user}
     else:
         raise fastapi.HTTPException(status_code=404, detail="User not found.")
 
+@app.get("/users")
+def get_users(limit: int = 10, page: int = 0):
+    users_data = controller_instance.get_users_paginated(limit, page)
+    return users_data
+
 # SERVER
 
 @app.get("/servers")
-def get_all_servers():
-    servers = controller_instance.server_repo.get_all()
-    return {"servers": servers}
+def get_servers(limit: int = 10, page: int = 0):
+    server_data = controller_instance.get_servers_paginated(limit, page)
+    return server_data
 
 @app.get("/servers/count")
 def count_servers():
@@ -68,7 +72,7 @@ def count_servers():
 
 @app.get("/server/{server_id}")
 def get_server(server_id: str):
-    server = controller_instance.server_repo.get(server_id)
+    server = controller_instance.get_server(server_id)
     if server:
         return {"server": server}
     else:

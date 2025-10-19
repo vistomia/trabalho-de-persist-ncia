@@ -129,31 +129,56 @@ class Database:
                 self.index[key] = (i, deleted)
                 index_writer.writerow([key, i, deleted])
 
-    def insert(self, record: dict):
-        """Insere um novo registro. Operação rápida de anexação.
+    def insert(self, records):
+        """Insere um ou mais registros. Operação rápida de anexação.
 
-        :param dict record: O registro a ser inserido.
+        :param dict|list records: O registro ou lista de registros a serem inseridos.
         """
-        key = str(record.get(self.key_column))
-
-        if key == 'None':
-            incremental_key = str(len(self.index) + 1)
-            record[self.key_column] = incremental_key
-            key = incremental_key
-
-        if key in self.index:
-            raise ValueError(f"A chave '{key}' já existe.")
-
-        record['deleted'] = 0
-        line_number = len(self.index)
+        # Normaliza entrada para sempre trabalhar com lista
+        if isinstance(records, dict):
+            records = [records]
         
+        if not records:
+            return
+        
+        # Validação prévia de todas as chaves
+        processed_records = []
+        for record in records:
+            record = record.copy()  # Evita modificar o original
+            key = str(record.get(self.key_column))
+
+            if key == 'None':
+                incremental_key = str(len(self.index) + len(processed_records) + 1)
+                record[self.key_column] = incremental_key
+                key = incremental_key
+
+            if key in self.index:
+                raise ValueError(f"A chave '{key}' já existe.")
+            
+            # Verifica duplicatas na própria lista
+            existing_keys = [r[self.key_column] for r in processed_records]
+            if key in existing_keys:
+                raise ValueError(f"Chave duplicada '{key}' na lista de registros.")
+
+            record['deleted'] = 0
+            processed_records.append((key, record))
+        
+        # Inserção em lote
+        starting_line = len(self.index)
         with open(self.data_path, 'a', newline='') as f_data, \
              open(self.index_path, 'a', newline='') as f_index:
-            csv.DictWriter(f_data, fieldnames=self.schema).writerow(record)
-            csv.writer(f_index).writerow([key, line_number, 0])
+            
+            data_writer = csv.DictWriter(f_data, fieldnames=self.schema)
+            index_writer = csv.writer(f_index)
+            
+            for i, (key, record) in enumerate(processed_records):
+                line_number = starting_line + i
+                data_writer.writerow(record)
+                index_writer.writerow([key, line_number, 0])
+                self.index[key] = (line_number, 0)
         
-        self.index[key] = (line_number, 0)
-        logging.debug(f"Registro inserido com chave '{key}' na linha {line_number}.")
+        count = len(processed_records)
+        self.logger.debug(f"{count} registro(s) inserido(s).")
 
     def get(self, key: str) -> dict | None:
         """Busca um registro pela chave usando o índice. Ignora registros deletados.
@@ -169,11 +194,33 @@ class Database:
         line_number = index_entry[0]
         with open(self.data_path, 'r', newline='') as f:
             reader = csv.reader(f)
-            # islice pula eficientemente para a linha alvo
             target_row_values = next(islice(reader, line_number + 1, None), None)
             if target_row_values:
                 return dict(zip(self.schema, target_row_values))
         return None
+    
+    def get_page(self, num, count):
+        """Retorna uma página de registros ativos (não deletados).
+
+        :param int num: Número da página (0-indexed).
+        :param int count: Número de registros por página.
+        :return: Lista de registros na página.
+        """
+        active_keys = [key for key, (_, deleted) in self.index.items() if deleted == 0]
+        start = num * count
+        end = start + count
+        page_keys = active_keys[start:end]
+        
+        records = []
+        with open(self.data_path, 'r', newline='') as f:
+            reader = csv.DictReader(f)
+            data = list(reader)
+            for key in page_keys:
+                line_number, _ = self.index[key]
+                records.append(data[line_number])
+        
+        return records
+        
 
     def update(self, key: str, updates: dict):
         """Atualiza um registro. Requer reescrita do arquivo.

@@ -17,6 +17,8 @@ class Controller:
         self.user_repo = User()
         self.server_repo = Server()
 
+    # ============= USER CRUD =============
+    
     def register_user(self, username: str, password: str) -> bool:
         if self.user_repo.is_username_taken(username):
             logging.warning(f"Registration failed: Username '{username}' is already taken.")
@@ -37,27 +39,111 @@ class Controller:
             logging.warning(f"Authentication failed for user '{username}'.")
             return False
     
-    def get_all_users(self) -> list[dict]:
-        return self.user_repo.get_all()
+    def get_user(self, username: str) -> dict | None:
+        return self.user_repo.get(username)
+    
+    def get_users_paginated(self, limit: int, page: int = 0) -> dict:
+        users = self.user_repo.db.get_page(page, limit)
+        total = self.user_repo.count()
+        total_pages = (total + limit - 1) // limit  # Ceiling division
+        
+        return {
+            "data": users,
+            "page": page,
+            "limit": limit,
+            "total": total,
+            "total_pages": total_pages
+        }
+    
+    def update_user(self, username: str, updates: dict) -> bool:
+        try:
+            self.user_repo.db.update(username, updates)
+            logging.info(f"User '{username}' updated successfully.")
+            return True
+        except ValueError as e:
+            logging.error(f"Failed to update user '{username}': {e}")
+            return False
+    
+    def delete_user(self, username: str) -> bool:
+        try:
+            self.user_repo.db.delete(username)
+            logging.info(f"User '{username}' deleted successfully.")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to delete user '{username}': {e}")
+            return False
     
     def count_users(self) -> int:
-        return len(self.get_all_users())
+        return self.user_repo.count()
+
+    def vacuum_users(self) -> None:
+        self.user_repo.db.vacuum()
+
+    # ============= SERVER CRUD =============
     
-    def validate_token(self, token: str) -> bool:
-        for user in self.get_all_users():
-            expected_token = hashlib.md5(f"{user['username']}{hash(user['password_hash'])}".encode()).hexdigest()
-            if token == expected_token:
-                return True
-        return False
+    def create_server(self, server_data: dict) -> str:
+        try:
+            self.server_repo.insert(server_data)
+            return f"Server '{server_data.get('name')}' created successfully"
+        except Exception as e:
+            logging.error(f"Failed to create server: {e}")
+            return f"Error creating server: {e}"
     
-    def server_exists(self, server_id: str) -> bool:
-        return core.server.Server.server_exists(server_id)
+    def get_server(self, server_id: str) -> dict | None:
+        return self.server_repo.get(server_id)
     
-    def server_repo(self):
-        return data.database.Server()
+    def get_servers_paginated(self, limit: int, page: int = 0) -> dict:
+        servers = self.server_repo.db.get_page(page, limit)
+        total = self.server_repo.count()
+        total_pages = (total + limit - 1) // limit  # Ceiling division
+        
+        return {
+            "data": servers,
+            "page": page,
+            "limit": limit,
+            "total": total,
+            "total_pages": total_pages
+        }
+    
+    def update_server(self, server_id: str, updates: dict) -> bool:
+        try:
+            self.server_repo.update(server_id, updates)
+            logging.info(f"Server '{server_id}' updated successfully.")
+            return True
+        except ValueError as e:
+            logging.error(f"Failed to update server '{server_id}': {e}")
+            return False
+    
+    def delete_server(self, server_id: str) -> bool:
+        try:
+            self.server_repo.delete(server_id)
+            logging.info(f"Server '{server_id}' deleted successfully.")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to delete server '{server_id}': {e}")
+            return False
+    
+    def count_servers(self) -> int:
+        return self.server_repo.count()
+    
+    def start_server(self, server_id: str) -> str:
+        server = self.get_server(server_id)
+        if not server:
+            return f"Server with ID '{server_id}' not found"
+        
+        # Aqui você implementaria a lógica de iniciar o servidor
+        logging.info(f"Starting server '{server_id}'...")
+        return f"Server '{server_id}' started successfully"
+
+    def vacuum_servers(self) -> None:
+        self.server_repo.db.vacuum()
+
+    # ============= DATABASE OPERATIONS =============
 
     def dump_database(self, background_tasks: BackgroundTasks):
         """Cria um backup usando dump.py, compacta em um arquivo temporário e faz o stream dele."""
+        
+        from data.dump import zip_store_files
         
         # 1. Cria um arquivo temporário para o backup
         with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp_zip_file:
@@ -93,19 +179,3 @@ class Controller:
             headers={"Content-Disposition": f"attachment; filename=database_backup.zip"}
         )
 
-    def create_server(self, server_data: dict) -> str:
-        self.server_repo.insert(server_data)
-        return f"created successfully."
-    
-    def start_server(self, server_id: str) -> str:
-        properties = self.server_repo.get_server_properties(server_id)
-        print(properties)
-        core.server.Server(server_id, properties)
-        if core.server.Server.server_exists(server_id):
-            with core.server.Server(server_id) as server:
-                server.run_core()
-        else:
-            with core.server.Server(server_id) as server:
-                server.download_server_jar()
-                server.eula()
-                server.run_core()

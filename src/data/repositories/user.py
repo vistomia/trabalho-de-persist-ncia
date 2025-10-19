@@ -27,9 +27,6 @@ class User:
     
     def is_username_taken(self, username: str) -> bool:
         return self.get(username) is not None
-
-    def get_all(self) -> list[dict]:
-        return self.db.get_all()
     
     def close(self):
         self.db.close()

@@ -1,2 +1,10 @@
 id,name,motd,version,slots,difficulty,online-mode,enable-command-block,spawn-monsters,force-gamemode,gamemode,white-list,pvp,allow-flight,allow-nether,spawn-protection,deleted
 1,Mundo de Aventuras,Bem-vindo ao nosso servidor! Sobreviva e construa.,1.20.1,20,normal,True,False,True,False,survival,False,True,False,True,16,0
+2,Servidor Survival,Bem-vindo ao servidor de survival!,1.20.1,20,normal,True,False,True,False,survival,False,True,False,True,16,0
+3,Servidor Criativo,Servidor para construção criativa,1.19.4,30,peaceful,False,False,False,False,creative,False,False,True,True,16,0
+4,Servidor PvP,Arena de PvP hardcore!,1.8.9,50,hard,True,False,True,True,adventure,False,True,False,True,16,0
+5,Servidor Privado,Servidor privado - apenas convidados,1.20.1,10,easy,True,False,True,False,survival,True,False,False,True,16,0
+6,Servidor Survival,Bem-vindo ao servidor de survival!,1.20.1,20,normal,True,False,True,False,survival,False,True,False,True,16,0
+7,Servidor Criativo,Servidor para construção criativa,1.19.4,30,peaceful,False,False,False,False,creative,False,False,True,True,16,0
+8,Servidor PvP,Arena de PvP hardcore!,1.8.9,50,hard,True,False,True,True,adventure,False,True,False,True,16,0
+9,Servidor Privado,Servidor privado - apenas convidados,1.20.1,10,easy,True,False,True,False,survival,True,False,False,True,16,0

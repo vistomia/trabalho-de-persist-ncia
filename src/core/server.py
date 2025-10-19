@@ -66,10 +66,3 @@ class Server:
         with open("server.properties", "w") as f:
             for key, value in properties_dict.items():
                 f.write(f"{key}={value}\n")
-
-if __name__ == "__main__":
-    with Server("MyServer") as server:
-        # server.download_server_jar()
-        # server.eula()
-        # server.properties()
-        server.run_core()
