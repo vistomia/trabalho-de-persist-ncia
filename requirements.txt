@@ -1,1 +1,3 @@
-polars
+fastapi[standard]
+pydantic
+bcrypt
