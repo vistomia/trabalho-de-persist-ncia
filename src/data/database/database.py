@@ -194,8 +194,11 @@ class Database:
         line_number = index_entry[0]
         with open(self.data_path, 'r', newline='') as f:
             reader = csv.reader(f)
-            target_row_values = next(islice(reader, line_number + 1, None), None)
-            if target_row_values:
+            # Skip header and read all rows to get the target line
+            next(reader)  # Skip header
+            rows = list(reader)
+            if line_number < len(rows):
+                target_row_values = rows[line_number]
                 return dict(zip(self.schema, target_row_values))
         return None
     

@@ -1,27 +1,29 @@
-import logging
-from data.repositories.server import Server
-from data.repositories.user import User
-import data
-import zipfile
 import os
-import io
+import logging
 import tempfile
+from data.repositories.user import User
+from data.repositories.server import Server
 from fastapi import BackgroundTasks
 from fastapi.responses import StreamingResponse
-from data.dump import zip_store_files
-import hashlib
-import core.server
 
 class Controller:
     def __init__(self):
         self.user_repo = User()
         self.server_repo = Server()
 
-    # ============= USER CRUD =============
+    # USER CRUD
     
     def register_user(self, username: str, password: str) -> bool:
         if self.user_repo.is_username_taken(username):
             logging.warning(f"Registration failed: Username '{username}' is already taken.")
+            return False
+        
+        if password.strip() == "":
+            logging.warning("Registration failed: Password cannot be empty.")
+            return False
+
+        if len(password) < 6:
+            logging.warning("Registration failed: Password must be at least 6 characters long.")
             return False
         
         self.user_repo.insert({
@@ -42,10 +44,12 @@ class Controller:
     def get_user(self, username: str) -> dict | None:
         return self.user_repo.get(username)
     
-    def get_users_paginated(self, limit: int, page: int = 0) -> dict:
+    def get_users_paginated(self, limit: int = 5, page: int = 0) -> dict:
+        if limit <= 0:
+            limit = 5
         users = self.user_repo.db.get_page(page, limit)
         total = self.user_repo.count()
-        total_pages = (total + limit - 1) // limit  # Ceiling division
+        total_pages = (total + limit - 1) // limit
         
         return {
             "data": users,
@@ -57,6 +61,22 @@ class Controller:
     
     def update_user(self, username: str, updates: dict) -> bool:
         try:
+            if updates.get("password", "").strip() == "":
+                logging.warning("Update failed: Password cannot be empty.")
+                return False
+            
+            if "password" in updates and len(updates["password"]) < 6:
+                logging.warning("Update failed: Password must be at least 6 characters long.")
+                return False
+            
+            if not self.user_repo.get(username):
+                logging.warning(f"Update failed: User '{username}' does not exist.")
+                return False
+            
+            if 'username' in updates:
+                logging.warning("Update failed: Username cannot be changed.")
+                return False
+            
             self.user_repo.db.update(username, updates)
             logging.info(f"User '{username}' updated successfully.")
             return True
@@ -65,6 +85,10 @@ class Controller:
             return False
     
     def delete_user(self, username: str) -> bool:
+        if not self.user_repo.get(username):
+            logging.warning(f"Delete failed: User '{username}' does not exist.")
+            return False
+        
         try:
             self.user_repo.db.delete(username)
             logging.info(f"User '{username}' deleted successfully.")
@@ -77,11 +101,26 @@ class Controller:
         return self.user_repo.count()
 
     def vacuum_users(self) -> None:
-        self.user_repo.db.vacuum()
-
-    # ============= SERVER CRUD =============
+        return self.user_repo.db.vacuum()
+    
+    # SERVER CRUD
     
     def create_server(self, server_data: dict) -> str:
+        if server_data.get('name') is None or server_data.get('name').strip() == "":
+            logging.warning("Server creation failed: 'name' field is required.")
+            return "Error creating server: 'name' field is required."
+        
+        if server_data.get('version') is None or server_data.get('version').strip() == "":
+            logging.warning("Server creation failed: 'version' field is required.")
+            return "Error creating server: 'version' field is required."
+        
+        
+        if server_data.get('difficulty') not in ['peaceful', 'easy', 'normal', 'hard']:
+            logging.warning("Server creation failed: 'difficulty' must be one of peaceful, easy, normal, hard.")
+            return "Error creating server: 'difficulty' must be one of peaceful, easy, normal, hard."
+        
+        
+
         try:
             self.server_repo.insert(server_data)
             return f"Server '{server_data.get('name')}' created successfully"
@@ -92,17 +131,11 @@ class Controller:
     def get_server(self, server_id: str) -> dict | None:
         return self.server_repo.get(server_id)
     
-    def get_servers_paginated(self, limit: int, page: int = 0) -> dict:
+    def get_servers_paginated(self, limit: int, page: int) -> dict:
         servers = self.server_repo.db.get_page(page, limit)
-        total = self.server_repo.count()
-        total_pages = (total + limit - 1) // limit  # Ceiling division
         
         return {
-            "data": servers,
-            "page": page,
-            "limit": limit,
-            "total": total,
-            "total_pages": total_pages
+            "data": servers
         }
     
     def update_server(self, server_id: str, updates: dict) -> bool:
@@ -131,51 +164,49 @@ class Controller:
         if not server:
             return f"Server with ID '{server_id}' not found"
         
-        # Aqui você implementaria a lógica de iniciar o servidor
         logging.info(f"Starting server '{server_id}'...")
+
+        with Server(name=server['name'], properties_dict=server) as srv:
+            if not Server.server_exists(server['name']):
+                srv.download_server_jar()
+                srv.eula()
+                srv.properties(server)
+            srv.run_core()
+
         return f"Server '{server_id}' started successfully"
 
     def vacuum_servers(self) -> bool:
         return self.server_repo.db.vacuum()
 
-    # ============= DATABASE OPERATIONS =============
+    # Dump
 
     def dump_database(self, background_tasks: BackgroundTasks):
         """Cria um backup usando dump.py, compacta em um arquivo temporário e faz o stream dele."""
         
         from data.dump import zip_store_files
         
-        # 1. Cria um arquivo temporário para o backup
+        # arquivo temporario
         with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp_zip_file:
             zip_path = tmp_zip_file.name
         
-        # 2. Usa a função do dump.py para criar o backup
         store_path = "data/store"
         success = zip_store_files(store_path, zip_path)
         
         if not success:
-            # Remove o arquivo temporário se falhou
             if os.path.exists(zip_path):
                 os.remove(zip_path)
             raise Exception("Falha ao criar o backup do banco de dados")
         
-        # 3. Cria um gerador que lê o arquivo temporário em pedaços
+        # leitor dos pedaços do zip
         def file_iterator(file_path: str):
-            try:
-                with open(file_path, "rb") as f:
-                    while chunk := f.read(8192): # Lê em pedaços de 8KB
-                        yield chunk
-            finally:
-                # O arquivo será limpo pela background task
-                pass
+            with open(file_path, "rb") as f:
+                while chunk := f.read(8192): # 8kb
+                    yield chunk
 
-        # 4. Adiciona a tarefa de limpeza para ser executada em segundo plano
         background_tasks.add_task(os.remove, zip_path)
 
-        # 5. Retorna o StreamingResponse com o GERADOR
         return StreamingResponse(
             file_iterator(zip_path),
             media_type="application/zip",
             headers={"Content-Disposition": f"attachment; filename=database_backup.zip"}
         )
-

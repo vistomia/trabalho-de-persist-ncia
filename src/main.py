@@ -16,7 +16,7 @@ def register_user(user: UserModel):
     if success:
         return {"message": "Usuário registrado com sucesso."}
     else:
-        raise fastapi.HTTPException(status_code=400, detail="Nome de usuário já está em uso.")
+        raise fastapi.HTTPException(status_code=400, detail="Erro na senha ou usuario.")
 
 @app.post("/login")
 def login_user(user: UserModel, response: fastapi.Response):
@@ -49,6 +49,22 @@ def get_users(limit: int = 10, page: int = 0):
     if users_data is None:
         raise fastapi.HTTPException(status_code=500, detail="Erro ao buscar usuários.")
     return users_data
+
+@app.delete("/user/{username}")
+def delete_user(username: str):
+    try:
+        message = controller_instance.delete_user(username)
+        return {"message": message}
+    except Exception as e:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar usuário.")
+
+@app.delete("/server/{server_id}")
+def delete_server(server_id: str):
+    try:
+        message = controller_instance.delete_server(server_id)
+        return {"message": message}
+    except Exception as e:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar servidor.")
 
 # Endpoints do  Server
 
@@ -108,6 +124,14 @@ def compute_hash(hash_name: str, data: str):
         raise fastapi.HTTPException(status_code=400, detail="Erro. Use MD5, SHA1, ou SHA256.")
     
     return {"hash": hash_object.hexdigest()}
+
+@app.delete("/server/{server_id}")
+def delete_server(server_id: str):
+    try:
+        message = controller_instance.delete_server(server_id)
+        return {"message": message}
+    except Exception as e:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar servidor.")
 
 # Endpoints do banco de dados
 

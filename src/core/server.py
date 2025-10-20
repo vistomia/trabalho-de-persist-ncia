@@ -1,9 +1,9 @@
-import urllib.request
-import subprocess
 import os
+import subprocess
+import urllib.request
 
 class Server:
-    """Classe para gerenciar um servidor de jogos."""
+    """Classe para gerenciar um servidor de Minecraft."""
     def __init__(self, name, properties_dict=None):
         self.name = name
         self.version = "1.8"
@@ -28,10 +28,7 @@ class Server:
     def download_server_jar(self):
         url = "https://launcher.mojang.com/v1/objects/a028f00e678ee5c6aef0e29656dca091b5df11c7/server.jar"
         filename = "server.jar"
-
-        print(f"Downloading {filename}...")
         urllib.request.urlretrieve(url, filename)
-        print(f"Downloaded {filename} successfully!")
 
     def run_core(self):
         self.running = True
