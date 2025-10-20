@@ -8,15 +8,15 @@ from fastapi import BackgroundTasks
 app = fastapi.FastAPI()
 controller_instance = Controller()
 
-# USER
+# Endpoints do User
 
 @app.post("/register")
 def register_user(user: UserModel):
     success = controller_instance.register_user(user.username, user.password)
     if success:
-        return {"message": "User registered successfully."}
+        return {"message": "Usuário registrado com sucesso."}
     else:
-        raise fastapi.HTTPException(status_code=400, detail="Username is already taken.")
+        raise fastapi.HTTPException(status_code=400, detail="Nome de usuário já está em uso.")
 
 @app.post("/login")
 def login_user(user: UserModel, response: fastapi.Response):
@@ -24,25 +24,15 @@ def login_user(user: UserModel, response: fastapi.Response):
     if authenticated:
         token = 1
         response.set_cookie(key="token", value=token)
-        return {"message": "User authenticated successfully.", "token": token}
+        return {"message": "Usuário autenticado com sucesso.", "token": token}
     else:
-        raise fastapi.HTTPException(status_code=401, detail="Invalid username or password.")
-
-@app.get("/user")
-def get_user(request: fastapi.Request,):
-    token = request.cookies.get("token")    
-
-    if not token:
-        raise fastapi.HTTPException(status_code=401, detail="Authentication required.")
-    
-    if token != "1":
-        raise fastapi.HTTPException(status_code=401, detail="Invalid token.")
-    
-    return {"user": user}
+        raise fastapi.HTTPException(status_code=401, detail="Nome de usuário ou senha inválidos.")
 
 @app.get("/users/count")
 def count_users():
     count = controller_instance.count_users()
+    if count is None:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao contar usuários.")
     return {"user_count": count}
 
 @app.get("/user/{username}")
@@ -51,23 +41,29 @@ def get_user(username: str):
     if user:
         return {"user": user}
     else:
-        raise fastapi.HTTPException(status_code=404, detail="User not found.")
+        raise fastapi.HTTPException(status_code=404, detail="Usuário não encontrado.")
 
 @app.get("/users")
 def get_users(limit: int = 10, page: int = 0):
     users_data = controller_instance.get_users_paginated(limit, page)
+    if users_data is None:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao buscar usuários.")
     return users_data
 
-# SERVER
+# Endpoints do  Server
 
 @app.get("/servers")
 def get_servers(limit: int = 10, page: int = 0):
     server_data = controller_instance.get_servers_paginated(limit, page)
+    if server_data is None:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao buscar servidores.")
     return server_data
 
 @app.get("/servers/count")
 def count_servers():
     count = controller_instance.count_servers()
+    if count is None:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao contar servidores.")
     return {"server_count": count}
 
 @app.get("/server/{server_id}")
@@ -76,18 +72,28 @@ def get_server(server_id: str):
     if server:
         return {"server": server}
     else:
-        raise fastapi.HTTPException(status_code=404, detail="Server not found.")
+        raise fastapi.HTTPException(status_code=404, detail="Servidor não encontrado.")
 
 @app.post("/server/create")
 def create_server(server: ServerModel):
-    server_data = server.model_dump()
-    message = controller_instance.create_server(server_data)
-    return {"message": message}
+    try:
+        server_data = server.model_dump()
+        message = controller_instance.create_server(server_data)
+        return {"message": message}
+    except Exception as e:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao criar servidor.")
 
 @app.get("/server/start/{id}")
 def start_server(id: str):
-    message = controller_instance.start_server(id)
-    return {"message": message}
+    try:
+        message = controller_instance.start_server(id)
+        if "erro" in message.lower() or "falha" in message.lower():
+            raise fastapi.HTTPException(status_code=500, detail=message)
+        return {"message": message}
+    except Exception as e:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao iniciar servidor.")
+
+# Aquele endpoint do hash
 
 @app.get("/hash/{hash_name}/{data}")
 def compute_hash(hash_name: str, data: str):
@@ -99,10 +105,26 @@ def compute_hash(hash_name: str, data: str):
     elif hash_name == "sha256":
         hash_object = hashlib.sha256(data.encode())
     else:
-        return {"error": "Unsupported hash type. Use MD5, SHA1, or SHA256."}
+        raise fastapi.HTTPException(status_code=400, detail="Erro. Use MD5, SHA1, ou SHA256.")
     
     return {"hash": hash_object.hexdigest()}
+
+# Endpoints do banco de dados
 
 @app.get("/dump_database")
 def dump_database(background_tasks: BackgroundTasks):
     return controller_instance.dump_database(background_tasks)
+
+@app.get("/vacuum_users")
+def vacuum_users():
+    if controller_instance.vacuum_users():
+        return {"message": "User database vacuumed successfully."}
+    else:
+        raise fastapi.HTTPException(status_code=500, detail="Falha ao vacuum user database.")
+
+@app.get("/vacuum_servers")
+def vacuum_servers():
+    if controller_instance.vacuum_servers():
+        return {"message": "Server database vacuumed successfully."}
+    else:
+        raise fastapi.HTTPException(status_code=500, detail="Falha ao vacuum server database.")

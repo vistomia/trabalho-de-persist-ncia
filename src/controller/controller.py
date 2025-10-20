@@ -135,8 +135,8 @@ class Controller:
         logging.info(f"Starting server '{server_id}'...")
         return f"Server '{server_id}' started successfully"
 
-    def vacuum_servers(self) -> None:
-        self.server_repo.db.vacuum()
+    def vacuum_servers(self) -> bool:
+        return self.server_repo.db.vacuum()
 
     # ============= DATABASE OPERATIONS =============
 

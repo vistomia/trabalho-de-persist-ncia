@@ -279,19 +279,37 @@ class Database:
 
         :return: Número de registros ativos.
         """
-        return sum(1 for _, deleted in self.index.values() if deleted == 0)
+        """Conta apenas os registros ativos (não deletados) usando o índice.
+        
+        Esta função percorre todos os registros no índice em memória e conta
+        apenas aqueles que não estão marcados como deletados (deleted == 0).
+        
+        :return: Número de registros ativos no banco de dados.
+        :rtype: int
+        """
+        active_count = 0
+        
+        for _, deleted_flag in self.index.values():
+            if deleted_flag == 0:
+                active_count += 1
+        
+        self.logger.debug(f"Total de registros ativos: {active_count}")
+        return active_count
 
-    def vacuum(self):
+    def vacuum(self) -> bool:
         """Remove fisicamente todos os registros marcados como deletados.
 
         :return: None
         """
         logging.info("Iniciando processo de vacuum...")
-        
         def operation(row, writer):
             if int(row.get('deleted', 0)) == 0:
-                writer.writerow(row) # Só escreve a linha se não estiver deletada
+                writer.writerow(row)
 
-        # A reescrita invalida todas as posições, então a reconstrução do índice é obrigatória
-        self._atomic_rewrite(operation, rebuild_index_after=True)
-        logging.info("Vacuum concluído.")
+        try:
+            self._atomic_rewrite(operation, rebuild_index_after=True)
+            logging.info("Vacuum concluído.")
+            return True
+        except Exception as e:
+            logging.error(f"Erro durante o processo de vacuum: {e}")
+            return False
