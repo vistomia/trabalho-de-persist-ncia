@@ -1,9 +1,3 @@
-"""
-Script de Seed - Usando TestClient do FastAPI
-Este script popula o banco de dados usando o TestClient do FastAPI,
-sem precisar fazer requisições HTTP reais.
-"""
-
 import faker
 import random
 import logging
@@ -62,7 +56,6 @@ def register_users(client: TestClient):
     return success_count
 
 def login_user(client: TestClient, username: str, password: str):
-    """Faz login usando TestClient"""
     response = client.post("/login", json={"username": username, "password": password})
     
     if response.status_code == 200:
@@ -73,7 +66,6 @@ def login_user(client: TestClient, username: str, password: str):
         return False
 
 def create_servers(client: TestClient):
-    """Cria servidores via TestClient"""
     logger.info("Criando servidores...")
     success_count = 0
     
@@ -82,11 +74,9 @@ def create_servers(client: TestClient):
         
         if response.status_code == 200:
             logger.info(f"Servidor '{server['name']}' criado")
-            success_count += 1
         else:
             logger.error(f"Erro ao criar servidor '{server['name']}': {response.status_code} - {response.text}")
     
-    logger.info(f"Total de servidores criados: {success_count}/{len(SERVERS_DATA)}")
     return success_count
 
 def main():
@@ -97,8 +87,7 @@ def main():
     logger.info("Verificando estado inicial do banco de dados...")
     
     create_servers(client)
-    #register_users(client)
+    register_users(client)
     logger.info("Fazendo login para teste de autenticação...")
-    #login_user(client, USERS_DATA[0]["username"], USERS_DATA[0]["password"])    
 
 main()

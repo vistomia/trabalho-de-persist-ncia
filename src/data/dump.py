@@ -17,7 +17,6 @@ def zip_store_files(store_path="store", output_zip="store_backup.zip"):
             for file_path in store_dir.rglob('*'):
                 if file_path.is_file():
                     arcname = file_path.relative_to(store_dir)
-                    print(f"Adding: {arcname}")
                     zipf.write(file_path, arcname)
         
         print(f"Successfully created {output_zip}")

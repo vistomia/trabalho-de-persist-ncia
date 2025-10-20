@@ -1,6 +1,5 @@
-import pydantic
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 
 class ServerModel(BaseModel):
     id: Optional[str] = None

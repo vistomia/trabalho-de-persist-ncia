@@ -99,9 +99,7 @@ class Database:
                 writer = csv.DictWriter(temp_file, fieldnames=self.schema)
                 writer.writeheader()
                 for row in reader:
-                    # A função de operação decide o que fazer com a linha
                     operation_func(row, writer)
-            # shutil.move é uma operação atômica na maioria dos sistemas
             shutil.move(temp_file.name, self.data_path)
         finally:
             if os.path.exists(temp_file.name):
@@ -134,17 +132,16 @@ class Database:
 
         :param dict|list records: O registro ou lista de registros a serem inseridos.
         """
-        # Normaliza entrada para sempre trabalhar com lista
+        
         if isinstance(records, dict):
             records = [records]
         
         if not records:
             return
         
-        # Validação prévia de todas as chaves
         processed_records = []
         for record in records:
-            record = record.copy()  # Evita modificar o original
+            record = record.copy()
             key = str(record.get(self.key_column))
 
             if key == 'None':
@@ -153,18 +150,21 @@ class Database:
                 key = incremental_key
 
             if key in self.index:
-                raise ValueError(f"A chave '{key}' já existe.")
+                print(f"A chave '{key}' já existe.")
+                return
             
-            # Verifica duplicatas na própria lista
             existing_keys = [r[self.key_column] for r in processed_records]
             if key in existing_keys:
-                raise ValueError(f"Chave duplicada '{key}' na lista de registros.")
+                print(f"A chave '{key}' já existe.")
+                return
 
             record['deleted'] = 0
             processed_records.append((key, record))
         
-        # Inserção em lote
-        starting_line = len(self.index)
+        with open(self.data_path, 'r', newline='') as f:
+            reader = csv.reader(f)
+            next(reader)  # Skip header
+            starting_line = sum(1 for _ in reader)
         with open(self.data_path, 'a', newline='') as f_data, \
              open(self.index_path, 'a', newline='') as f_index:
             
@@ -188,14 +188,14 @@ class Database:
         key = str(key)
         index_entry = self.index.get(key)
         
-        if not index_entry or index_entry[1] == 1: # Não existe ou está deletado
+        if not index_entry or index_entry[1] == 1:
             return None
         
         line_number = index_entry[0]
         with open(self.data_path, 'r', newline='') as f:
             reader = csv.reader(f)
-            # Skip header and read all rows to get the target line
-            next(reader)  # Skip header
+            
+            next(reader)
             rows = list(reader)
             if line_number < len(rows):
                 target_row_values = rows[line_number]
@@ -243,6 +243,7 @@ class Database:
 
         self._atomic_rewrite(operation)
         logging.info(f"Registro '{key}' atualizado.")
+        print("lau")
 
     def delete(self, key: str):
         """Realiza um 'soft delete', marcando o registro como deletado.
@@ -255,14 +256,12 @@ class Database:
             logging.warning(f"Chave '{key}' não encontrada ou já deletada.")
             return
 
-        # É uma operação de atualização que muda a flag 'deleted'
         self.update(key, {'deleted': 1})
         
-        # Atualiza o índice em memória e no disco
         line_number, _ = self.index[key]
         self.index[key] = (line_number, 1)
-        self.rebuild_index() # Necessário para atualizar o arquivo de índice
-
+        self.rebuild_index()
+    
     def drop(self):
         """Apaga todos os dados e índices, reiniciando o banco de dados.
 

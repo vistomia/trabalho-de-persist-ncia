@@ -1,52 +1,51 @@
 id,name,motd,version,slots,difficulty,online_mode,enable_command_block,spawn_monsters,force_gamemode,gamemode,white_list,pvp,allow_flight,allow_nether,spawn_protection,deleted
-1,Mundo de Aventuras,Bem-vindo ao nosso servidor! Sobreviva e construa.,1.20.1,20,normal,True,False,True,False,survival,False,True,False,True,16,0
-2,Servidor Roleplay Aparecida Rodrigues - EI,Numquam at quis laborum.,1.8,99,hard,False,False,True,True,creative,True,False,True,True,4,0
-3,Servidor Survival Vargas Sá S/A,Architecto nobis dicta quos soluta adipisci.,1.8,92,hard,True,True,False,True,creative,True,False,True,False,30,0
-4,Servidor Mini-jogos Siqueira - ME,Libero harum laborum aperiam ratione autem.,1.8,13,normal,True,False,False,False,spectator,True,False,False,True,28,0
-5,Servidor Survival Freitas e Filhos,Reiciendis libero ipsum sunt.,1.8,34,hard,False,True,True,True,adventure,False,True,True,True,3,0
-6,Servidor Roleplay Gomes,Beatae quas in quibusdam facere.,1.8,93,normal,False,False,False,True,survival,True,False,True,False,0,0
-7,Servidor Survival Andrade S.A.,Illo eos autem consequatur.,1.8,94,peaceful,False,False,False,True,survival,True,True,False,True,10,0
-8,Servidor PvP Mendes,Adipisci totam magnam corrupti architecto.,1.8,68,hard,False,True,True,False,survival,False,True,False,False,1,0
-9,Servidor Mini-jogos Azevedo,Et eaque asperiores occaecati ut ipsum facere.,1.8,77,easy,True,True,True,True,adventure,False,False,True,True,9,0
-10,Servidor Mini-jogos Lima Fernandes - EI,Similique expedita nobis in labore veritatis.,1.8,41,normal,False,True,True,False,spectator,False,False,True,False,28,0
-11,Servidor Mini-jogos Brito,Saepe nostrum corporis excepturi.,1.8,79,hard,False,False,False,True,spectator,False,False,False,False,32,0
-12,Servidor Privado Viana,Accusantium quos placeat illum.,1.8,14,normal,True,True,False,False,spectator,False,False,True,True,3,0
-13,Servidor Privado Siqueira Ribeiro - ME,Eius ratione amet nulla.,1.8,88,easy,True,False,True,True,spectator,False,True,True,False,17,0
-14,Servidor Roleplay Campos,Recusandae corrupti iusto molestiae.,1.8,60,easy,True,True,True,False,spectator,False,True,True,False,22,0
-15,Servidor Mini-jogos Santos Dias S.A.,Totam esse illo quam commodi error.,1.8,86,peaceful,True,True,True,True,spectator,True,True,True,False,21,0
-16,Servidor Privado Ramos S.A.,Enim fuga officia deserunt illo.,1.8,43,peaceful,True,True,False,True,creative,True,True,True,False,16,0
-17,Servidor Mini-jogos Ribeiro,Sapiente nobis enim praesentium laboriosam.,1.8,65,normal,False,False,True,False,spectator,True,True,True,False,27,0
-18,Servidor Criativo Lopes Ltda.,Rem iure ab animi.,1.8,85,normal,True,True,False,True,adventure,True,False,True,False,4,0
-19,Servidor Skyblock Viana,Laborum repudiandae non totam eaque optio.,1.8,18,hard,False,True,False,False,survival,False,False,False,False,17,0
-20,Servidor Survival Teixeira,Voluptatem incidunt facere inventore.,1.8,33,normal,True,True,False,False,creative,True,False,False,True,27,0
-21,Servidor Survival da Cruz e Filhos,A quae adipisci vitae animi nostrum.,1.8,53,hard,True,False,False,False,survival,False,False,True,False,16,0
-22,Servidor Criativo Aparecida - EI,Dolores enim maxime exercitationem consequuntur.,1.8,18,peaceful,False,False,True,False,spectator,True,False,False,True,12,0
-23,Servidor Survival Teixeira,Occaecati incidunt mollitia expedita rem enim.,1.8,89,peaceful,True,False,True,True,creative,True,True,False,True,29,0
-24,Servidor Roleplay Farias S.A.,Quis ratione voluptas corrupti laboriosam est.,1.8,16,hard,False,True,False,True,creative,True,True,True,True,29,0
-25,Servidor Roleplay Nunes,Quam sequi atque nihil optio repellat aliquid.,1.8,44,easy,True,False,False,False,creative,True,True,True,False,5,0
-26,Servidor Privado Vargas - ME,Maxime itaque voluptas officia et.,1.8,57,normal,False,True,False,True,adventure,False,False,True,True,17,0
-27,Servidor Privado da Luz,Accusamus nostrum alias cum id error.,1.8,59,normal,False,True,True,True,survival,False,True,True,False,30,0
-28,Servidor Criativo Almeida,Beatae unde consectetur sapiente temporibus.,1.8,29,peaceful,True,True,False,False,survival,True,True,False,False,24,0
-29,Servidor Skyblock Pires,Eveniet cupiditate illo eos.,1.8,26,peaceful,False,False,True,False,adventure,False,False,True,True,7,0
-30,Servidor Mini-jogos Duarte - ME,Vero excepturi laborum magnam.,1.8,21,easy,True,False,False,False,adventure,True,False,False,False,8,0
-31,Servidor Privado Montenegro,Possimus facilis cum mollitia dicta ullam illo.,1.8,96,peaceful,False,False,True,False,creative,True,False,True,True,15,0
-32,Servidor Roleplay Silva,Iure expedita enim repellendus.,1.8,24,normal,True,True,False,True,creative,False,False,True,True,14,0
-33,Servidor Privado Gonçalves,Sequi et cupiditate corporis accusantium.,1.8,23,hard,False,True,True,True,adventure,False,False,False,True,21,0
-34,Servidor Skyblock Campos Lima - EI,Commodi aliquam ex quia id mollitia animi.,1.8,96,hard,True,True,True,False,adventure,True,True,False,True,11,0
-35,Servidor PvP Sales Cassiano - ME,Culpa occaecati ipsum.,1.8,16,hard,True,True,False,False,spectator,True,False,False,True,5,0
-36,Servidor Criativo Nunes,Iusto rem est odio aut nulla.,1.8,39,easy,False,True,True,True,creative,True,False,False,True,2,0
-37,Servidor Roleplay Teixeira Siqueira S/A,Odit minus laudantium nihil.,1.8,30,peaceful,False,True,False,False,creative,True,True,True,False,28,0
-38,Servidor Roleplay Moura Ltda.,Ut itaque libero aspernatur vitae.,1.8,41,peaceful,True,True,False,False,adventure,False,False,False,True,13,0
-39,Servidor Criativo Vieira Ribeiro S.A.,Dolorem hic sint reprehenderit non.,1.8,90,peaceful,False,True,True,False,adventure,False,False,False,True,14,0
-40,Servidor Mini-jogos da Costa e Filhos,Ipsam saepe enim beatae doloremque ex aliquid.,1.8,85,peaceful,False,True,False,False,creative,False,True,True,False,16,0
-41,Servidor PvP Abreu,Possimus odit repudiandae consectetur.,1.8,83,normal,False,False,False,True,adventure,True,True,False,True,4,0
-42,Servidor Survival Silveira Ribeiro - ME,Aperiam reiciendis inventore magni.,1.8,88,easy,True,False,True,True,adventure,False,False,False,False,2,0
-43,Servidor Skyblock Lopes,Voluptate deleniti nostrum nesciunt.,1.8,22,easy,True,True,False,False,survival,True,True,False,True,24,0
-44,Servidor Roleplay Jesus S.A.,Enim distinctio porro.,1.8,39,normal,False,False,False,False,survival,False,False,True,False,10,0
-45,Servidor Mini-jogos Teixeira S.A.,Dolores magni placeat facilis impedit.,1.8,80,hard,True,False,False,False,creative,False,True,False,False,0,0
-46,Servidor Privado Fogaça,Consectetur unde laborum doloremque vitae.,1.8,72,normal,False,False,True,True,creative,True,True,False,True,22,0
-47,Servidor Roleplay Rezende,Modi quis explicabo debitis ratione quo.,1.8,10,normal,True,True,False,False,creative,True,True,False,True,30,0
-48,Servidor Roleplay da Mata,Et cum illo illum esse.,1.8,39,peaceful,True,False,False,True,survival,True,False,False,False,28,0
-49,Servidor PvP Guerra Sousa S/A,Blanditiis id possimus quidem consectetur.,1.8,88,hard,False,False,True,False,creative,False,False,True,False,31,0
-50,Servidor PvP Macedo - EI,Assumenda odio cum voluptate natus quam id.,1.8,59,easy,True,False,False,False,creative,False,False,False,True,26,0
-51,Servidor Privado Novais S.A.,Itaque nulla id voluptatem accusamus.,1.8,49,normal,False,True,False,False,survival,False,False,True,False,12,0
+1,Servidor Skyblock Montenegro e Filhos,Quis nesciunt nemo id rerum deserunt rem.,1.8,99,hard,True,False,False,False,survival,True,True,True,True,20,0
+2,Servidor Survival Aragão,Similique debitis vero vel ipsa.,1.8,80,peaceful,True,True,True,True,creative,False,False,True,True,29,0
+3,Servidor Criativo da Costa S/A,Quam et dolore laudantium aliquid.,1.8,69,easy,True,True,False,True,survival,True,True,False,True,31,0
+4,Servidor Criativo Nogueira - ME,Commodi error eum reiciendis a earum.,1.8,34,easy,False,False,True,False,spectator,True,True,True,True,24,0
+5,Servidor Survival Moura Barros - EI,Cumque maxime voluptas amet culpa.,1.8,48,normal,True,False,True,False,survival,True,True,False,False,11,0
+6,Servidor Criativo da Cunha,At minima eos ab tempore.,1.8,75,easy,False,True,False,False,creative,True,True,False,True,20,0
+7,Servidor Mini-jogos Jesus,Error officia distinctio ducimus.,1.8,87,easy,True,False,False,False,survival,False,False,True,True,24,0
+8,Servidor PvP Souza Novaes S/A,Nostrum non dolores dolorem porro.,1.8,42,easy,False,False,True,False,creative,False,False,False,False,14,0
+9,Servidor Criativo Freitas,Doloremque cumque assumenda itaque.,1.8,95,easy,True,True,True,False,adventure,False,True,False,True,29,0
+10,Servidor Criativo da Luz Almeida Ltda.,Expedita inventore amet.,1.8,92,peaceful,True,True,False,False,adventure,False,True,False,True,16,0
+11,Servidor Mini-jogos Melo - ME,Rem rerum consequatur ipsa.,1.8,66,easy,True,False,True,True,adventure,True,True,False,False,24,0
+12,Servidor Skyblock Dias,Dolores dicta fugiat cum esse sunt explicabo.,1.8,45,hard,True,False,False,False,creative,True,True,False,True,26,0
+13,Servidor Skyblock Rodrigues Vargas S.A.,Quos quos voluptas consequatur dolorum.,1.8,19,hard,True,True,False,True,survival,True,False,False,False,12,0
+14,Servidor Roleplay Pereira,Hic quas accusantium quas.,1.8,60,hard,False,False,False,False,creative,True,False,False,False,18,0
+15,Servidor PvP Marques Aragão S/A,Quibusdam ad nihil omnis.,1.8,50,easy,False,True,False,False,spectator,False,True,True,True,3,0
+16,Servidor Roleplay Cassiano da Mota S.A.,Provident dolor neque qui.,1.8,52,easy,False,True,True,True,spectator,True,False,True,True,16,0
+17,Servidor Skyblock Rocha S.A.,Doloribus rerum similique neque.,1.8,56,normal,True,True,True,False,spectator,False,False,False,True,20,0
+18,Servidor Survival Teixeira,Minus minus porro ut tempora ut.,1.8,80,hard,False,False,False,False,creative,False,True,True,True,19,0
+19,Servidor Roleplay Sales,Facilis ex nam commodi.,1.8,11,easy,True,False,True,False,survival,True,False,False,True,12,0
+20,Servidor PvP Santos,Laboriosam magni corporis fugit.,1.8,43,easy,True,True,False,False,survival,False,True,True,True,15,0
+21,Servidor Skyblock Câmara,Neque perspiciatis aperiam non.,1.8,59,easy,True,True,True,True,survival,False,False,True,True,3,0
+22,Servidor Criativo Garcia,Minima earum dolore nisi natus.,1.8,25,easy,False,False,True,False,survival,False,False,True,False,12,0
+23,Servidor Criativo Silva - ME,Tempore labore vero numquam.,1.8,55,hard,True,True,False,True,survival,False,False,False,False,18,0
+24,Servidor Roleplay Peixoto Costela S/A,Consequuntur quas eum voluptate.,1.8,49,peaceful,True,False,True,True,survival,True,True,False,True,31,0
+25,Servidor Privado Gonçalves,Quidem nobis quam temporibus consequuntur.,1.8,24,easy,True,True,True,False,adventure,False,False,False,False,5,0
+26,Servidor PvP Brito,Nisi provident necessitatibus est vitae dicta.,1.8,16,normal,False,False,False,False,survival,False,True,False,False,20,0
+27,Servidor Privado Abreu e Filhos,Officia vel nostrum impedit veritatis quibusdam.,1.8,11,hard,False,False,True,False,creative,True,True,False,False,29,0
+28,Servidor Privado Fogaça Mendes e Filhos,Iusto nulla distinctio repellat.,1.8,80,hard,False,True,False,False,spectator,True,False,True,True,9,0
+29,Servidor Skyblock Brito Rezende S.A.,Cupiditate in fuga vel nam.,1.8,35,hard,True,False,False,True,adventure,False,True,False,True,26,0
+30,Servidor Roleplay Ribeiro Borges - ME,Nulla soluta veniam quaerat.,1.8,65,hard,False,True,False,True,adventure,False,True,False,True,9,0
+31,Servidor Roleplay Dias,Iure incidunt ex ea ipsa nemo.,1.8,72,normal,True,False,False,False,adventure,False,False,True,False,22,0
+32,Servidor Roleplay Sousa,Pariatur molestiae recusandae.,1.8,90,peaceful,True,True,False,False,adventure,True,False,True,True,14,0
+33,Servidor Privado Casa Grande Sousa S/A,Distinctio quibusdam porro vitae.,1.8,61,peaceful,False,True,False,False,creative,True,False,True,True,31,0
+34,Servidor Mini-jogos Viana Aparecida Ltda.,Sit consequuntur at. A mollitia qui.,1.8,42,normal,True,False,True,True,adventure,False,True,True,False,29,0
+35,Servidor Criativo Oliveira Monteiro S/A,Mollitia praesentium eveniet molestias unde.,1.8,22,normal,True,False,True,True,spectator,True,True,True,False,0,0
+36,Servidor Privado Montenegro - ME,Modi id qui eos unde rem fugiat.,1.8,78,normal,True,False,False,True,spectator,True,False,False,True,6,0
+37,Servidor Survival Campos,Numquam doloribus voluptate nostrum eaque.,1.8,17,easy,False,False,True,False,survival,True,True,False,True,1,0
+38,Servidor Roleplay Lima,Quaerat dolore excepturi aspernatur.,1.8,90,hard,False,True,True,False,spectator,True,False,True,True,12,0
+39,Servidor Survival Azevedo Duarte S.A.,Ex quibusdam quod rem nulla consequatur minus.,1.8,93,easy,True,False,False,False,survival,True,False,True,True,18,0
+40,Servidor Skyblock Vargas - ME,Reprehenderit autem ullam.,1.8,98,hard,True,False,False,False,adventure,False,True,False,False,14,0
+41,Servidor Skyblock da Rocha - EI,Vitae alias autem quia perspiciatis provident.,1.8,77,easy,False,False,True,False,creative,True,True,True,False,19,0
+42,Servidor Privado Rezende,Rerum doloremque laborum cumque.,1.8,92,hard,True,True,False,True,adventure,True,False,True,False,30,0
+43,Servidor Survival Brito S/A,Ut iure quo hic nesciunt.,1.8,93,normal,False,True,True,True,creative,False,True,True,False,9,0
+44,Servidor Skyblock Fernandes,Minima commodi fugiat rem tenetur ullam labore.,1.8,70,hard,False,False,True,True,survival,True,True,True,False,28,0
+45,Servidor Roleplay Pastor Cavalcante - EI,Quibusdam saepe vel laborum voluptatum velit.,1.8,40,normal,False,False,False,True,spectator,False,True,True,True,5,0
+46,Servidor PvP Moura,Ipsam ex suscipit eaque autem saepe.,1.8,51,peaceful,True,True,False,False,survival,False,False,True,False,25,0
+47,Servidor Survival das Neves,Aliquid amet temporibus iste commodi.,1.8,96,normal,True,True,True,False,survival,False,True,False,True,25,0
+48,Servidor Survival Siqueira,Minus natus eveniet ad consectetur quo.,1.8,44,peaceful,False,False,False,False,creative,True,False,True,True,9,0
+49,Servidor Skyblock Araújo Ltda.,Ullam quia quod ducimus sapiente.,1.8,83,hard,False,False,False,True,creative,True,False,True,True,30,0
+50,Servidor Skyblock da Conceição Ltda.,Labore maiores porro voluptate omnis eveniet.,1.8,26,hard,False,False,False,True,creative,False,False,False,False,26,0

@@ -34,7 +34,6 @@ class Server:
         if not server:
             return None
 
-        # Get server properties (configuration settings only, not ID or name)
         properties = {}
         for key, value in server.items():
             if key not in ['id', 'name', 'deleted']:

@@ -59,13 +59,13 @@ class Controller:
             "total_pages": total_pages
         }
     
-    def update_user(self, username: str, updates: dict) -> bool:
+    def update_user_password(self, username: str, password: str) -> bool:
         try:
-            if updates.get("password", "").strip() == "":
+            if password.strip() == "":
                 logging.warning("Update failed: Password cannot be empty.")
                 return False
             
-            if "password" in updates and len(updates["password"]) < 6:
+            if len(password) < 6:
                 logging.warning("Update failed: Password must be at least 6 characters long.")
                 return False
             
@@ -73,11 +73,15 @@ class Controller:
                 logging.warning(f"Update failed: User '{username}' does not exist.")
                 return False
             
-            if 'username' in updates:
+            if username:
                 logging.warning("Update failed: Username cannot be changed.")
                 return False
             
-            self.user_repo.db.update(username, updates)
+            self.user_repo.delete(username)
+            self.user_repo.insert({
+                "username": username,
+                "password": password
+            })
             logging.info(f"User '{username}' updated successfully.")
             return True
         except ValueError as e:
@@ -210,3 +214,7 @@ class Controller:
             media_type="application/zip",
             headers={"Content-Disposition": f"attachment; filename=database_backup.zip"}
         )
+
+if __name__ == "__main__":
+    controller = Controller()
+    controller.start_server("1")

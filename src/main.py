@@ -58,13 +58,14 @@ def delete_user(username: str):
     except Exception as e:
         raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar usuário.")
 
-@app.delete("/server/{server_id}")
-def delete_server(server_id: str):
+@app.put("/user/{username}/password")
+def update_user_password(username: str, new_password: str):
     try:
-        message = controller_instance.delete_server(server_id)
+        message = controller_instance.update_user_password(username, new_password)
         return {"message": message}
     except Exception as e:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar servidor.")
+        print(e)
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao atualizar senha do usuário.")
 
 # Endpoints do  Server
 
@@ -132,6 +133,17 @@ def delete_server(server_id: str):
         return {"message": message}
     except Exception as e:
         raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar servidor.")
+
+@app.put("/server/{server_id}")
+def update_server(server_id: str, updates: dict):
+    try:
+        success = controller_instance.update_server(server_id, updates)
+        if success:
+            return {"message": "Servidor atualizado com sucesso."}
+        else:
+            raise fastapi.HTTPException(status_code=404, detail="Servidor não encontrado.")
+    except Exception as e:
+        raise fastapi.HTTPException(status_code=500, detail="Erro ao atualizar servidor.")
 
 # Endpoints do banco de dados
 

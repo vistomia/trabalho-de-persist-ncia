@@ -12,15 +12,20 @@ class User:
         )
 
     def insert(self, user_data: dict):
-        password_bytes = user_data['password'].encode('utf-8')
-        salt = bcrypt.gensalt()
-        hashed_password = bcrypt.hashpw(password_bytes, salt)
-        token = hashlib.sha256(f"{user_data['username']}{hash(hashed_password.decode('utf-8'))}".encode()).hexdigest()
-        self.db.insert({
-                "username": user_data['username'], 
-                "password_hash": hashed_password.decode('utf-8'),
-                "token": token
-                })
+        try:
+            password_bytes = user_data['password'].encode('utf-8')
+            salt = bcrypt.gensalt()
+            hashed_password = bcrypt.hashpw(password_bytes, salt)
+            token = hashlib.sha256(f"{user_data['username']}{hash(hashed_password.decode('utf-8'))}".encode()).hexdigest()
+            result = self.db.insert({
+                    "username": user_data['username'], 
+                    "password_hash": hashed_password.decode('utf-8'),
+                    "token": token
+                    })
+            return result
+        except Exception as e:
+            print(f"Error inserting user: {e}")
+            return False
     
     def get(self, username: str) -> dict | None:
         return self.db.get(username)
