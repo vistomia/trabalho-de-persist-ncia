@@ -59,38 +59,37 @@ class Controller:
             "total_pages": total_pages
         }
     
-    def update_user_password(self, username: str, password: str) -> bool:
+    def update_user_password(self, username: str, old_password: str, new_password: str) -> str:
         try:
-            if password.strip() == "":
+            if new_password.strip() == "":
                 logging.warning("Update failed: Password cannot be empty.")
-                return False
+                return "error"
             
-            if len(password) < 6:
+            if len(new_password) < 6:
                 logging.warning("Update failed: Password must be at least 6 characters long.")
-                return False
+                return "error"
             
-            if not self.user_repo.get(username):
-                logging.warning(f"Update failed: User '{username}' does not exist.")
-                return False
-            
-            if username:
-                logging.warning("Update failed: Username cannot be changed.")
-                return False
-            
-            self.user_repo.delete(username)
-            self.user_repo.insert({
+            if not self.authenticate_user(username, old_password):
+                logging.warning("Update failed: Old password dont match.")
+                return "error"
+
+            self.user_repo.db.update(username, {
                 "username": username,
-                "password": password
+                "password": new_password
             })
+            
+            ## self.user_repo.db.delete(username)
+            ## self.user_repo.insert({"username": username, "password": new_password})
+
             logging.info(f"User '{username}' updated successfully.")
-            return True
+            return "update succesfully"
         except ValueError as e:
             logging.error(f"Failed to update user '{username}': {e}")
             return False
     
     def delete_user(self, username: str) -> bool:
         if not self.user_repo.get(username):
-            logging.warning(f"Delete failed: User '{username}' does not exist.")
+            logging.warning(f"Delete: User '{username}' does not exist.")
             return False
         
         try:

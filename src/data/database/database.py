@@ -149,7 +149,7 @@ class Database:
                 record[self.key_column] = incremental_key
                 key = incremental_key
 
-            if key in self.index:
+            if key in self.index and self.index[key][1] == 0:
                 print(f"A chave '{key}' já existe.")
                 return
             
@@ -230,20 +230,36 @@ class Database:
 
         :param str key: A chave do registro a ser atualizado.
         """
+        
+        self.delete(key)
+        self.insert(updates)
+
+        logging.info(f"Registro '{key}' atualizado.")
+    
+    def update_in_line(self, key: str, updates: dict):
+        """Atualiza um registro específico sem reescrever todo o arquivo.
+
+        :param str key: A chave do registro a ser atualizado.
+        :param dict updates: Dicionário com os campos a serem atualizados.
+        :return: None
+        """
         key = str(key)
         if key not in self.index or self.index[key][1] == 1:
-            raise ValueError(f"Registro com chave '{key}' não encontrado ou está deletado.")
-        if self.key_column in updates:
-            raise ValueError("A coluna chave não pode ser atualizada.")
+            logging.warning(f"Chave '{key}' não encontrada ou deletada.")
+            return
+
+        line_number, _ = self.index[key]
 
         def operation(row, writer):
-            if str(row[self.key_column]) == key:
-                row.update(updates)
+            current_key = row[self.key_column]
+            if current_key == key:
+                for k, v in updates.items():
+                    if k in self.schema:
+                        row[k] = v
             writer.writerow(row)
 
-        self._atomic_rewrite(operation)
-        logging.info(f"Registro '{key}' atualizado.")
-        print("lau")
+        self._atomic_rewrite(operation, rebuild_index_after=False)
+        logging.info(f"Registro '{key}' atualizado in-line.")
 
     def delete(self, key: str):
         """Realiza um 'soft delete', marcando o registro como deletado.
@@ -256,7 +272,7 @@ class Database:
             logging.warning(f"Chave '{key}' não encontrada ou já deletada.")
             return
 
-        self.update(key, {'deleted': 1})
+        self.update_in_line(key, {'deleted': 1})
         
         line_number, _ = self.index[key]
         self.index[key] = (line_number, 1)

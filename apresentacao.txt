@@ -1,0 +1,10 @@
+Henrique
+    - fastapi
+    - database
+    - script_seed
+    - debug
+
+Victor
+    - controller
+    - database
+    - debug

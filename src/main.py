@@ -10,6 +10,8 @@ controller_instance = Controller()
 
 # Endpoints do User
 
+## Endpoint de aplicação
+
 @app.post("/register")
 def register_user(user: UserModel):
     success = controller_instance.register_user(user.username, user.password)
@@ -27,6 +29,8 @@ def login_user(user: UserModel, response: fastapi.Response):
         return {"message": "Usuário autenticado com sucesso.", "token": token}
     else:
         raise fastapi.HTTPException(status_code=401, detail="Nome de usuário ou senha inválidos.")
+
+## Endpoints de requisitos
 
 @app.get("/users/count")
 def count_users():
@@ -50,7 +54,7 @@ def get_users(limit: int = 10, page: int = 0):
         raise fastapi.HTTPException(status_code=500, detail="Erro ao buscar usuários.")
     return users_data
 
-@app.delete("/user/{username}")
+@app.delete("/users")
 def delete_user(username: str):
     try:
         message = controller_instance.delete_user(username)
@@ -58,16 +62,20 @@ def delete_user(username: str):
     except Exception as e:
         raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar usuário.")
 
-@app.put("/user/{username}/password")
-def update_user_password(username: str, new_password: str):
+@app.put("/users")
+def update_user_password(username: str, user_data: dict):
     try:
-        message = controller_instance.update_user_password(username, new_password)
+        old_password = user_data.get("old_password")
+        new_password = user_data.get("new_password")
+        message = controller_instance.update_user_password(username, old_password, new_password)
         return {"message": message}
     except Exception as e:
         print(e)
         raise fastapi.HTTPException(status_code=500, detail="Erro ao atualizar senha do usuário.")
 
 # Endpoints do  Server
+
+## Endpoint de requisitos
 
 @app.get("/servers")
 def get_servers(limit: int = 10, page: int = 0):
@@ -91,7 +99,7 @@ def get_server(server_id: str):
     else:
         raise fastapi.HTTPException(status_code=404, detail="Servidor não encontrado.")
 
-@app.post("/server/create")
+@app.post("/servers")
 def create_server(server: ServerModel):
     try:
         server_data = server.model_dump()
@@ -99,6 +107,8 @@ def create_server(server: ServerModel):
         return {"message": message}
     except Exception as e:
         raise fastapi.HTTPException(status_code=500, detail="Erro ao criar servidor.")
+
+## Endpoints de aplicação
 
 @app.get("/server/start/{id}")
 def start_server(id: str):
@@ -126,7 +136,7 @@ def compute_hash(hash_name: str, data: str):
     
     return {"hash": hash_object.hexdigest()}
 
-@app.delete("/server/{server_id}")
+@app.delete("/servers")
 def delete_server(server_id: str):
     try:
         message = controller_instance.delete_server(server_id)
@@ -134,7 +144,7 @@ def delete_server(server_id: str):
     except Exception as e:
         raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar servidor.")
 
-@app.put("/server/{server_id}")
+@app.put("/servers")
 def update_server(server_id: str, updates: dict):
     try:
         success = controller_instance.update_server(server_id, updates)
@@ -150,17 +160,3 @@ def update_server(server_id: str, updates: dict):
 @app.get("/dump_database")
 def dump_database(background_tasks: BackgroundTasks):
     return controller_instance.dump_database(background_tasks)
-
-@app.get("/vacuum_users")
-def vacuum_users():
-    if controller_instance.vacuum_users():
-        return {"message": "User database vacuumed successfully."}
-    else:
-        raise fastapi.HTTPException(status_code=500, detail="Falha ao vacuum user database.")
-
-@app.get("/vacuum_servers")
-def vacuum_servers():
-    if controller_instance.vacuum_servers():
-        return {"message": "Server database vacuumed successfully."}
-    else:
-        raise fastapi.HTTPException(status_code=500, detail="Falha ao vacuum server database.")

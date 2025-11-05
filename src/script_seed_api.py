@@ -7,14 +7,14 @@ from main import app
 fake = faker.Faker('pt_BR')
 
 USERS_DATA = []
-for _ in range(50):
+for _ in range(1000):
     USERS_DATA.append({
         "username": fake.user_name(),
         "password": fake.password(length=random.randint(8, 16))
     })
 
 SERVERS_DATA = []
-for _ in range(50):
+for _ in range(1000):
     server_types = ["Survival", "Criativo", "PvP", "Privado", "Mini-jogos", "Roleplay", "Skyblock"]
     server_type = random.choice(server_types)
     
