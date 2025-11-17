@@ -1,8 +1,8 @@
 import os
 import logging
 import tempfile
-from data.repositories.user import User
-from data.repositories.server import Server
+from database.repositories.user import User
+from database.repositories.server import Server
 from fastapi import BackgroundTasks
 from fastapi.responses import StreamingResponse
 
@@ -186,7 +186,7 @@ class Controller:
     def dump_database(self, background_tasks: BackgroundTasks):
         """Cria um backup usando dump.py, compacta em um arquivo temporário e faz o stream dele."""
         
-        from data.dump import zip_store_files
+        from database.dump import zip_store_files
         
         # arquivo temporario
         with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp_zip_file:

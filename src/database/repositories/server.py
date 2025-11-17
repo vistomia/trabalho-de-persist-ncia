@@ -1,4 +1,4 @@
-from data.database import Database
+from database.database import Database
 
 class Server:
     def __init__(self):

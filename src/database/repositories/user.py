@@ -1,5 +1,4 @@
-from data.database import Database
-import bcrypt
+from database.database import Database
 import hashlib
 
 class User:
@@ -14,12 +13,9 @@ class User:
     def insert(self, user_data: dict):
         try:
             password_bytes = user_data['password'].encode('utf-8')
-            salt = bcrypt.gensalt()
-            hashed_password = bcrypt.hashpw(password_bytes, salt)
-            token = hashlib.sha256(f"{user_data['username']}{hash(hashed_password.decode('utf-8'))}".encode()).hexdigest()
             result = self.db.insert({
                     "username": user_data['username'], 
-                    "password_hash": hashed_password.decode('utf-8'),
+                    "password": hashed_password.decode('utf-8'),
                     "token": token
                     })
             return result
