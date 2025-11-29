@@ -1,4 +1,7 @@
-from sqlmodel import Field, SQLModel, create_engine, Session
+from sqlmodel import Field, SQLModel
 
-class User:
-    pass
+class User(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    username: str
+    email: str
+    password: str

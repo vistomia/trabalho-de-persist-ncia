@@ -1,162 +1,49 @@
 import fastapi
-import hashlib
-
-from controller import Controller
-from schemas import UserModel, ServerModel
-from fastapi import BackgroundTasks
+import database.database
+from routers import user
+import models
+from database import database
+from sqlmodel import SQLModel, Field, create_engine, Session, select, MetaData, insert
+from models.user import User
 
 app = fastapi.FastAPI()
-controller_instance = Controller()
+app.include_router(user.router)
 
-# Endpoints do User
+db = database.Database(uri='sqlite:///data.sqlite')
+engine = db.get_engine()
+metadata = MetaData()
 
-## Endpoint de aplicação
+# Create tables
+SQLModel.metadata.create_all(engine)
 
-@app.post("/register")
-def register_user(user: UserModel):
-    success = controller_instance.register_user(user.username, user.password)
-    if success:
-        return {"message": "Usuário registrado com sucesso."}
-    else:
-        raise fastapi.HTTPException(status_code=400, detail="Erro na senha ou usuario.")
+# Use User model instead of users_table
+metadata.create_all(engine)
 
-@app.post("/login")
-def login_user(user: UserModel, response: fastapi.Response):
-    authenticated = controller_instance.authenticate_user(user.username, user.password)
-    if authenticated:
-        token = 1
-        response.set_cookie(key="token", value=token)
-        return {"message": "Usuário autenticado com sucesso.", "token": token}
-    else:
-        raise fastapi.HTTPException(status_code=401, detail="Nome de usuário ou senha inválidos.")
-
-## Endpoints de requisitos
-
-@app.get("/users/count")
-def count_users():
-    count = controller_instance.count_users()
-    if count is None:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao contar usuários.")
-    return {"user_count": count}
-
-@app.get("/user/{username}")
-def get_user(username: str):
-    user = controller_instance.get_user(username)
-    if user:
-        return {"user": user}
-    else:
-        raise fastapi.HTTPException(status_code=404, detail="Usuário não encontrado.")
-
-@app.get("/users")
-def get_users(limit: int = 10, page: int = 0):
-    users_data = controller_instance.get_users_paginated(limit, page)
-    if users_data is None:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao buscar usuários.")
-    return users_data
-
-@app.delete("/users")
-def delete_user(username: str):
-    try:
-        message = controller_instance.delete_user(username)
-        return {"message": message}
-    except Exception as e:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar usuário.")
-
-@app.put("/users")
-def update_user_password(username: str, user_data: dict):
-    try:
-        old_password = user_data.get("old_password")
-        new_password = user_data.get("new_password")
-        message = controller_instance.update_user_password(username, old_password, new_password)
-        return {"message": message}
-    except Exception as e:
-        print(e)
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao atualizar senha do usuário.")
-
-# Endpoints do  Server
-
-## Endpoint de requisitos
-
-@app.get("/servers")
-def get_servers(limit: int = 10, page: int = 0):
-    server_data = controller_instance.get_servers_paginated(limit, page)
-    if server_data is None:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao buscar servidores.")
-    return server_data
-
-@app.get("/servers/count")
-def count_servers():
-    count = controller_instance.count_servers()
-    if count is None:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao contar servidores.")
-    return {"server_count": count}
-
-@app.get("/server/{server_id}")
-def get_server(server_id: str):
-    server = controller_instance.get_server(server_id)
-    if server:
-        return {"server": server}
-    else:
-        raise fastapi.HTTPException(status_code=404, detail="Servidor não encontrado.")
-
-@app.post("/servers")
-def create_server(server: ServerModel):
-    try:
-        server_data = server.model_dump()
-        message = controller_instance.create_server(server_data)
-        return {"message": message}
-    except Exception as e:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao criar servidor.")
-
-## Endpoints de aplicação
-
-@app.get("/server/start/{id}")
-def start_server(id: str):
-    try:
-        message = controller_instance.start_server(id)
-        if "erro" in message.lower() or "falha" in message.lower():
-            raise fastapi.HTTPException(status_code=500, detail=message)
-        return {"message": message}
-    except Exception as e:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao iniciar servidor.")
-
-# Aquele endpoint do hash
-
-@app.get("/hash/{hash_name}/{data}")
-def compute_hash(hash_name: str, data: str):
-    hash_name = hash_name.lower()
-    if hash_name == "md5":
-        hash_object = hashlib.md5(data.encode())
-    elif hash_name == "sha1":
-        hash_object = hashlib.sha1(data.encode())
-    elif hash_name == "sha256":
-        hash_object = hashlib.sha256(data.encode())
-    else:
-        raise fastapi.HTTPException(status_code=400, detail="Erro. Use MD5, SHA1, ou SHA256.")
+with Session(engine) as session:
+    # Check if the table has any data
+    statement = select(User).limit(1)
+    result = session.exec(statement).first()
     
-    return {"hash": hash_object.hexdigest()}
+    if result is None:
+        print("Table is empty. Inserting sample data...")
+        # Create User instances
+        users_to_add = [
+            User(username="alice", email="alice@example.com", password="password123"),
+            User(username="bob", email="bob@example.com", password="password123"),
+            User(username="carol", email="carol@example.com", password="password123")
+        ]
+        
+        # Add users to session and commit
+        for user in users_to_add:
+            session.add(user)
+        session.commit()
+    
+    # Print all data
+    statement = select(User)
+    results = session.exec(statement)
+    for user in results:
+        print(f"ID: {user.id}, Username: {user.username}, Email: {user.email}")
 
-@app.delete("/servers")
-def delete_server(server_id: str):
-    try:
-        message = controller_instance.delete_server(server_id)
-        return {"message": message}
-    except Exception as e:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao deletar servidor.")
-
-@app.put("/servers")
-def update_server(server_id: str, updates: dict):
-    try:
-        success = controller_instance.update_server(server_id, updates)
-        if success:
-            return {"message": "Servidor atualizado com sucesso."}
-        else:
-            raise fastapi.HTTPException(status_code=404, detail="Servidor não encontrado.")
-    except Exception as e:
-        raise fastapi.HTTPException(status_code=500, detail="Erro ao atualizar servidor.")
-
-# Endpoints do banco de dados
-
-@app.get("/dump_database")
-def dump_database(background_tasks: BackgroundTasks):
-    return controller_instance.dump_database(background_tasks)
+@app.get("/")
+async def root():
+    return {"message": "hello"}
