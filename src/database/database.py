@@ -1,4 +1,3 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, insert, select
 # import logging
 # import logger as logger
 from models.user import User
@@ -17,6 +16,9 @@ class Database:
     
     def get_engine(self):
         return self.__engine
+    
+    def get_session(self):
+        return Session(self.__engine)
 
 
 if __name__ == "__main__":

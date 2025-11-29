@@ -1,10 +1,7 @@
 import fastapi
-import database.database
 from routers import user
-from routers import java
-import models
 from database import database
-from sqlmodel import SQLModel, Field, create_engine, Session, select, MetaData, insert
+from sqlmodel import SQLModel, Session, select, MetaData, insert
 from models.user import User
 from models.map import Map
 from models.operator import Operator
@@ -16,16 +13,13 @@ from datetime import datetime
 
 app = fastapi.FastAPI()
 app.include_router(user.router)
-app.include_router(java.router)
 
 db = database.Database(uri='sqlite:///data.sqlite')
 engine = db.get_engine()
 metadata = MetaData()
 
-# Create tables
 SQLModel.metadata.create_all(engine)
 
-# Use User model instead of users_table
 metadata.create_all(engine)
 
 with Session(engine) as session:
@@ -123,24 +117,20 @@ with Session(engine) as session:
     # Print all data from User table
     statement = select(User)
     results = session.exec(statement)
-    print("\n=== Users ===")
+    print("\n# Users")
     for user in results:
         print(f"ID: {user.id}, Username: {user.username}, Email: {user.email}")
     
     # Print Java instances
     java_statement = select(Java)
     java_results = session.exec(java_statement)
-    print("\n=== Java Versions ===")
+    print("\n# Java Versions")
     for java in java_results:
         print(f"ID: {java.id}, Name: {java.name}, Link: {java.link}")
     
     # Print Server instances
     server_statement = select(Server)
     server_results = session.exec(server_statement)
-    print("\n=== Servers ===")
+    print("\n# Servers")
     for server in server_results:
         print(f"ID: {server.id}, Name: {server.name}, Owner ID: {server.owner_id}")
-
-@app.get("/")
-async def root():
-    return {"message": "hello"}

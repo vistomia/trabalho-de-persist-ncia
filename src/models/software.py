@@ -2,6 +2,7 @@ from sqlmodel import SQLModel, Field
 from datetime import datetime
 
 class Software(SQLModel, table=True):
+    __tablename__ = "softwares"
     id: int = Field(primary_key=True)
     name: str
     link: str

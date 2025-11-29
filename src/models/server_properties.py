@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field
 
 class ServerProperties(SQLModel, table=True):
+    __tablename__ = "server_properties"
     # Basic server settings
     id: int = Field(default=None, primary_key=True)
     accepts_transfers: bool = False
