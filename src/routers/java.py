@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlmodel import Session, select, func, or_
-from typing import List, Optional
 from models.java import Java, JavaResponse
 from database.database import Database
 
-# Create database instance
 db = Database(uri='sqlite:///data.sqlite')
 
 def get_session():
@@ -14,11 +12,11 @@ def get_session():
 
 router = APIRouter()
 
-@router.get("/java/", tags=["java"], response_model=List[JavaResponse])
+@router.get("/java/", tags=["java"], response_model=list[JavaResponse])
 async def read_java(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    search: Optional[str] = Query(None),
+    search: str | None = Query(None),
     session: Session = Depends(get_session)
 ):
     """List Java entries with pagination and text search"""
@@ -44,10 +42,10 @@ async def read_java_by_id(java_id: int, session: Session = Depends(get_session))
         raise HTTPException(status_code=404, detail="Java entry not found")
     return java_entry
 
-@router.get("/java/search/", tags=["java"], response_model=List[JavaResponse])
+@router.get("/java/search/", tags=["java"], response_model=list[JavaResponse])
 async def search_java(
-    name: Optional[str] = Query(None),
-    link: Optional[str] = Query(None),
+    name: str | None = Query(None),
+    link: str | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: Session = Depends(get_session)
@@ -74,7 +72,7 @@ async def count_java(session: Session = Depends(get_session)):
     count = session.exec(select(func.count(Java.id))).one()
     return {"count": count}
 
-@router.get("/java/ordered/", tags=["java"], response_model=List[JavaResponse])
+@router.get("/java/ordered/", tags=["java"], response_model=list[JavaResponse])
 async def read_java_ordered(
     order_by: str = Query("id", regex="^(id|name|link|created_at)$"),
     desc: bool = Query(False),

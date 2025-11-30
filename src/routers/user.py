@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlmodel import Session, select, func, or_
-from typing import List, Optional
 from models.user import User, UserResponse
 from database.database import Database
 
@@ -14,11 +13,11 @@ def get_session():
 
 router = APIRouter()
 
-@router.get("/users/", tags=["users"], response_model=List[UserResponse])
+@router.get("/users/", tags=["users"], response_model=list[UserResponse])
 async def read_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    search: Optional[str] = Query(None),
+    search: str | None = Query(None),
     session: Session = Depends(get_session)
 ):
     """List users with pagination and text search"""
@@ -44,10 +43,10 @@ async def read_user(user_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@router.get("/users/search/", tags=["users"], response_model=List[UserResponse])
+@router.get("/users/search/", tags=["users"], response_model=list[UserResponse])
 async def search_users(
-    username: Optional[str] = Query(None),
-    email: Optional[str] = Query(None),
+    username: str | None = Query(None),
+    email: str | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: Session = Depends(get_session)
@@ -74,7 +73,7 @@ async def count_users(session: Session = Depends(get_session)):
     count = session.exec(select(func.count(User.id))).one()
     return {"count": count}
 
-@router.get("/users/ordered/", tags=["users"], response_model=List[UserResponse])
+@router.get("/users/ordered/", tags=["users"], response_model=list[UserResponse])
 async def read_users_ordered(
     order_by: str = Query("id", regex="^(id|username|email)$"),
     desc: bool = Query(False),
