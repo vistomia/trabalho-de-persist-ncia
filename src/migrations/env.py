@@ -6,32 +6,24 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 
-# --- IMPORTS EXTERNOS ---
 from dotenv import load_dotenv
 from sqlmodel import SQLModel
 
-# 1. Configura o PATH para o Python encontrar a pasta 'src'
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-# 2. Carrega variáveis do .env
 load_dotenv()
 
-# 3. Importa os Models
-# O bloco try/except evita que o código quebre se o import falhar, mas avisa no terminal.
 try:
     from src.models import *
 except ImportError as e:
     print(f"ALERTA: Não foi possível importar 'src.models'. Verifique se o arquivo __init__.py existe na pasta models. Erro: {e}")
 
-# --- CONFIGURAÇÃO PADRÃO DO ALEMBIC ---
 
 config = context.config
 
-# Configuração de Log
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# 4. Sobrescreve a URL do banco com a do .env
 database_url = os.getenv("DATABASE_URL")
 
 if database_url:
@@ -39,7 +31,6 @@ if database_url:
 else:
     raise Exception("A variável DATABASE_URL não foi encontrada no arquivo .env")
 
-# 5. Conecta o metadata do SQLModel
 target_metadata = SQLModel.metadata
 
 def run_migrations_offline() -> None:
