@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 class Server(SQLModel, table=True):
     __tablename__ = "servers"
     
-    id: int = Field(primary_key=True)
+    id: int = Field(default=None, primary_key=True)
     name: str
     owner_id: int = Field(foreign_key="users.id")
     server_properties_id: int = Field(foreign_key="server_properties.id")

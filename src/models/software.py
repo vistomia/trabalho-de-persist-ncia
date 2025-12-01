@@ -3,7 +3,7 @@ from datetime import datetime
 
 class Software(SQLModel, table=True):
     __tablename__ = "softwares"
-    id: int = Field(primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str
     link: str
     version: str

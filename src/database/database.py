@@ -1,8 +1,9 @@
 # import logging
 # import logger as logger
+import sqlite3
 from models.user import User
-from sqlmodel import SQLModel, Field, create_engine, Session, select
-
+from sqlalchemy import event
+from sqlmodel import create_engine, Session
 class Database:
     """Gerencia um banco de dados baseado em um arquivo CSV com um índice sequencial.
     
@@ -13,50 +14,18 @@ class Database:
         self.__engine = create_engine(uri, echo_pool=True)
         # self.logger = logging.getLogger(__name__)
         user = User()
+
+        event.listen(self.__engine, "connect", self._set_sqlite_pragma)
+
+    @staticmethod
+    def _set_sqlite_pragma(dbapi_connection, connection_record):
+        if isinstance(dbapi_connection, sqlite3.Connection):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
     
     def get_engine(self):
         return self.__engine
     
     def get_session(self):
         return Session(self.__engine)
-
-
-if __name__ == "__main__":
-    db = Database(uri='sqlite:///data.sqlite')
-    engine = db.get_engine()
-    metadata = MetaData()
-    
-    # Create tables
-    SQLModel.metadata.create_all(engine)
-
-    # Use User model instead of users_table
-    metadata.create_all(engine)
-
-    with engine.connect() as conn:
-        # Check if the table has any data
-        result = conn.execute(select(User).limit(1))
-        
-        if result.first() is None:
-            print("Table is empty. Inserting sample data...")
-            # Create a list of new users to add
-            data_to_insert = [
-                {"username": "alice", "email": "alice@example.com"},
-                {"username": "bob", "email": "bob@example.com"},
-                {"username": "carol", "email": "carol@example.com"}
-            ]
-            
-            # Execute the insert statement
-            conn.execute(insert(User), data_to_insert)
-            
-            # Commit the changes to the database file
-            conn.commit()
-            
-            # Print all data
-            for row in result:
-                print(f"ID: {row.id}, Username: {row.username}, Email: {row.email}")
-        else:
-            pass
-        stmt = select(User)
-        result = conn.execute(stmt)
-        for row in result:
-            print(f"ID: {row.id}, Username: {row.username}, Email: {row.email}")

@@ -8,9 +8,9 @@ if TYPE_CHECKING:
 
 class Operator(SQLModel, table=True):
     __tablename__ = "operators"
-    
-    server_id: int = Field(foreign_key='servers.id', primary_key=True)
-    user_id: int = Field(foreign_key='users.id', primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
+    server_id: int = Field(foreign_key='servers.id')
+    user_id: int = Field(foreign_key='users.id')
     permission_level: str = Field(max_length=50)
     granted_at: datetime = Field(default_factory=datetime.now)
     
