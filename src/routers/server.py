@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlmodel import Session, select, func, or_
 from models.server import Server
+from models.operator import Operator
 from database.database import Database
 
 db = Database(uri='sqlite:///data.sqlite')
@@ -36,6 +37,18 @@ async def read_server_by_id(server_id: int, session: Session = Depends(get_sessi
     if not server:
         raise HTTPException(status_code=404, detail="Server not found")
     return server
+
+@router.get("/server/{server_id}/operators/", tags=["operators"], response_model=list[Operator])
+async def read_operators_by_server(
+    server_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: Session = Depends(get_session)
+):
+    """Get all operators for a specific server"""
+    query = select(Operator).where(Operator.server_id == server_id).offset(skip).limit(limit)
+    operators = session.exec(query).all()
+    return operators
 
 @router.get("/servers/search/", tags=["servers"], response_model=list[Server])
 async def search_servers(

@@ -56,44 +56,6 @@ async def read_operator_by_ids(
         raise HTTPException(status_code=404, detail="Operator relationship not found")
     return operator
 
-@router.get("/operators/by-server/{server_id}", tags=["operators"], response_model=list[Operator])
-async def read_operators_by_server(
-    server_id: int,
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
-    session: Session = Depends(get_session)
-):
-    """Get all operators for a specific server"""
-    query = select(Operator).where(Operator.server_id == server_id).offset(skip).limit(limit)
-    operators = session.exec(query).all()
-    return operators
-
-@router.get("/operators/by-user/{user_id}", tags=["operators"], response_model=list[Operator])
-async def read_operators_by_user(
-    user_id: int,
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
-    session: Session = Depends(get_session)
-):
-    """Get all operator relationships for a specific user"""
-    query = select(Operator).where(Operator.user_id == user_id).offset(skip).limit(limit)
-    operators = session.exec(query).all()
-    return operators
-
-@router.get("/operators/by-permission/{permission_level}", tags=["operators"], response_model=list[Operator])
-async def read_operators_by_permission(
-    permission_level: str,
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
-    session: Session = Depends(get_session)
-):
-    """Get operators by permission level"""
-    query = select(Operator).where(
-        Operator.permission_level.contains(permission_level)
-    ).offset(skip).limit(limit)
-    operators = session.exec(query).all()
-    return operators
-
 @router.get("/operators/count/", tags=["operators"])
 async def count_operators(
     server_id: int | None = Query(None),

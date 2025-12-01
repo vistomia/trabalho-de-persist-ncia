@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlmodel import Session, select, func, or_
 from models.user import User, UserResponse
 from database.database import Database
+from models.operator import Operator
 
 # Create database instance
 db = Database(uri='sqlite:///data.sqlite')
@@ -42,6 +43,18 @@ async def read_user(user_id: int, session: Session = Depends(get_session)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+@router.get("/users/{user_id}/operators/", tags=["operators"], response_model=list[Operator])
+async def read_operators_by_user(
+    user_id: int,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: Session = Depends(get_session)
+):
+    """Get all operator relationships for a specific user"""
+    query = select(Operator).where(Operator.user_id == user_id).offset(skip).limit(limit)
+    operators = session.exec(query).all()
+    return operators
 
 @router.get("/users/search/", tags=["users"], response_model=list[UserResponse])
 async def search_users(
