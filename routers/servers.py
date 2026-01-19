@@ -39,21 +39,22 @@ async def create_server(server_data: servers.ServerCreate):
     
     server = Server(**server_data.dict())
     await server.insert()
-    return Server(**server.dict())
+    return await Server.get(server.id, fetch_links=True)
 
 @router.get("/", response_model=Page[Server])
 async def list_servers():
     """Listar servidores com paginação"""
-    return await apaginate(Server.find())
+    query = Server.find(fetch_links=True)
+    return await apaginate(query)
 
 @router.get("/{server_id}", response_model=Server)
 async def get_server(server_id: PydanticObjectId):
     """Obter servidor por ID"""
-    server = await Server.get(server_id)
+    server = await Server.get(server_id, fetch_links=True)
     if not server:
         raise HTTPException(status_code=404, detail="Servidor não encontrado")
     
-    return Server(**server.dict())
+    return server
 
 @router.get("/{server_id}/details", response_model=Server)
 async def get_server_details(server_id: PydanticObjectId):
@@ -62,7 +63,7 @@ async def get_server_details(server_id: PydanticObjectId):
     if not server:
         raise HTTPException(status_code=404, detail="Servidor não encontrado")
     
-    return Server(**server.dict())
+    return server
 
 @router.put("/{server_id}", response_model=Server)
 async def update_server(server_id: PydanticObjectId, server_data: servers.ServerCreate):
@@ -91,7 +92,7 @@ async def update_server(server_id: PydanticObjectId, server_data: servers.Server
     update_data = server_data.dict(exclude_unset=True)
     await server.update({"$set": update_data})
     
-    return Server(**server.dict())
+    return await Server.get(server.id, fetch_links=True)
 
 @router.delete("/{server_id}")
 async def delete_server(server_id: PydanticObjectId):
@@ -106,7 +107,7 @@ async def delete_server(server_id: PydanticObjectId):
 @router.get("/search/by-name/{name}", response_model=Page[Server])
 async def search_servers_by_name(name: str):
     """Busca case-insensitive por nome do servidor"""
-    query = Server.find({"name": {"$regex": name, "$options": "i"}})
+    query = Server.find({"name": {"$regex": name, "$options": "i"}}, fetch_links=True)
     return await apaginate(query)
 
 @router.get("/owner/{owner_id}/servers", response_model=Page[Server])
@@ -117,7 +118,7 @@ async def get_servers_by_owner(owner_id: PydanticObjectId):
     if not owner:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
-    query = Server.find(Server.owner_id == owner_id)
+    query = Server.find(Server.owner_id == owner_id, fetch_links=True)
     return await apaginate(query)
 
 @router.get("/by-year/{year}", response_model=Page[Server])
@@ -131,7 +132,7 @@ async def get_servers_by_year(year: int):
             "$gte": start_date,
             "$lt": end_date
         }
-    })
+    }, fetch_links=True)
     return await apaginate(query)
 
 @router.get("/by-date-range", response_model=Page[Server])
@@ -165,7 +166,7 @@ async def get_servers_by_date_range(
     elif end_date:
         query_filter["created_at"] = {"$lt": end_date}
     
-    query = Server.find(query_filter)
+    query = Server.find(query_filter, fetch_links=True)
     return await apaginate(query)
 
 
@@ -221,3 +222,217 @@ async def count_servers_with_operators():
     count = result[0]["servers_with_operators"] if result else 0
     
     return {"servers_with_operators": count}
+
+@router.get("/aggregations/servers-by-software")
+async def servers_by_software():
+    """Quantidade de servidores por software"""
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "softwares",
+                "localField": "software_id",
+                "foreignField": "_id",
+                "as": "software_info"
+            }
+        },
+        {
+            "$group": {
+                "_id": "$software_id",
+                "software_name": {"$first": {"$arrayElemAt": ["$software_info.name", 0]}},
+                "count": {"$sum": 1},
+                "servers": {"$push": "$name"}
+            }
+        },
+        {
+            "$sort": {"count": -1}
+        }
+    ]
+    
+    result = await Server.aggregate(pipeline).to_list()
+    return {"servers_by_software": result}
+
+@router.get("/aggregations/servers-by-owner")
+async def servers_by_owner():
+    """Quantidade de servidores por proprietário"""
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "owner_id", 
+                "foreignField": "_id",
+                "as": "owner_info"
+            }
+        },
+        {
+            "$group": {
+                "_id": "$owner_id",
+                "owner_name": {"$first": {"$arrayElemAt": ["$owner_info.username", 0]}},
+                "count": {"$sum": 1},
+                "servers": {"$push": "$name"}
+            }
+        },
+        {
+            "$sort": {"count": -1}
+        }
+    ]
+    
+    result = await Server.aggregate(pipeline).to_list()
+    return {"servers_by_owner": result}
+
+@router.get("/aggregations/operators-per-server")
+async def operators_per_server():
+    """Quantidade de operadores por servidor"""
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "operators",
+                "localField": "_id",
+                "foreignField": "server_id", 
+                "as": "operators"
+            }
+        },
+        {
+            "$project": {
+                "name": 1,
+                "status": 1,
+                "operators_count": {"$size": "$operators"},
+                "operators": {
+                    "$map": {
+                        "input": "$operators",
+                        "as": "op",
+                        "in": {
+                            "user_id": "$$op.user_id",
+                            "permission_level": "$$op.permission_level"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "$sort": {"operators_count": -1}
+        }
+    ]
+    
+    result = await Server.aggregate(pipeline).to_list()
+    return {"operators_per_server": result}
+
+@router.get("/aggregations/average-operators")
+async def average_operators_per_server():
+    """Média de operadores por servidor"""
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "operators",
+                "localField": "_id", 
+                "foreignField": "server_id",
+                "as": "operators"
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "avg_operators": {"$avg": {"$size": "$operators"}},
+                "total_servers": {"$sum": 1},
+                "total_operators": {"$sum": {"$size": "$operators"}}
+            }
+        }
+    ]
+    
+    result = await Server.aggregate(pipeline).to_list(1)
+    stats = result[0] if result else {"avg_operators": 0, "total_servers": 0, "total_operators": 0}
+    return {"average_operators_stats": stats}
+
+@router.get("/aggregations/servers-by-creation-month")
+async def servers_by_creation_month():
+    """Servidores criados por mês"""
+    pipeline = [
+        {
+            "$group": {
+                "_id": {
+                    "year": {"$year": "$created_at"},
+                    "month": {"$month": "$created_at"}
+                },
+                "count": {"$sum": 1},
+                "servers": {"$push": {"name": "$name", "created_at": "$created_at"}}
+            }
+        },
+        {
+            "$sort": {"_id.year": -1, "_id.month": -1}
+        }
+    ]
+    
+    result = await Server.aggregate(pipeline).to_list()
+    return {"servers_by_month": result}
+
+@router.get("/complex/servers-with-details")
+async def servers_with_complete_details():
+    """Consulta complexa: Servidores com todos os detalhes relacionados"""
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "owner_id",
+                "foreignField": "_id", 
+                "as": "owner"
+            }
+        },
+        {
+            "$lookup": {
+                "from": "softwares",
+                "localField": "software_id",
+                "foreignField": "_id",
+                "as": "software"
+            }
+        },
+        {
+            "$lookup": {
+                "from": "java_versions", 
+                "localField": "java_id",
+                "foreignField": "_id",
+                "as": "java"
+            }
+        },
+        {
+            "$lookup": {
+                "from": "server_properties",
+                "localField": "server_properties_id",
+                "foreignField": "_id",
+                "as": "properties"
+            }
+        },
+        {
+            "$lookup": {
+                "from": "maps",
+                "localField": "map_id", 
+                "foreignField": "_id",
+                "as": "map"
+            }
+        },
+        {
+            "$lookup": {
+                "from": "operators",
+                "localField": "_id",
+                "foreignField": "server_id",
+                "as": "operators"
+            }
+        },
+        {
+            "$project": {
+                "name": 1,
+                "status": 1,
+                "ip_address": 1,
+                "port": 1,
+                "created_at": 1,
+                "owner": {"$arrayElemAt": ["$owner", 0]},
+                "software": {"$arrayElemAt": ["$software", 0]},
+                "java": {"$arrayElemAt": ["$java", 0]},
+                "properties": {"$arrayElemAt": ["$properties", 0]},
+                "map": {"$arrayElemAt": ["$map", 0]},
+                "operators_count": {"$size": "$operators"},
+                "operators": "$operators"
+            }
+        }
+    ]
+    
+    result = await Server.aggregate(pipeline).to_list()
+    return {"servers_with_details": result}
