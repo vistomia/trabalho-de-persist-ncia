@@ -1,22 +1,35 @@
-# import logging
-# import logger as logger
-import sqlite3
-from sqlalchemy import event
-from sqlmodel import create_engine, Session
-class Database:
-    def __init__(self, uri: str):
-        self.__engine = create_engine(uri, echo_pool=True)
-        event.listen(self.__engine, "connect", self._set_sqlite_pragma)
+from motor.motor_asyncio import AsyncIOMotorClient
+from beanie import init_beanie
+from core.config import settings
+from models.users import User
+from models.servers import Server
+from models.java_links import Java
+from models.softwares import Software
+from models.servers_properties import ServerProperties
+from models.operators import Operator
+from models.minecraft_maps import Map
 
-    @staticmethod
-    def _set_sqlite_pragma(dbapi_connection, connection_record):
-        if isinstance(dbapi_connection, sqlite3.Connection):
-            cursor = dbapi_connection.cursor()
-            cursor.execute("PRAGMA foreign_keys=ON")
-            cursor.close()
-    
-    def get_engine(self):
-        return self.__engine
-    
-    def get_session(self):
-        return Session(self.__engine)
+class Database:
+    client: AsyncIOMotorClient = None
+
+db = Database()
+
+async def connect_to_mongo():
+    """Conecta ao MongoDB e inicializa o Beanie"""
+    db.client = AsyncIOMotorClient(settings.mongodb_url)
+    await init_beanie(
+        database=db.client[settings.database_name],
+        document_models=[
+            User,
+            Server, 
+            Java,
+            Software,
+            ServerProperties,
+            Operator,
+            Map
+        ]
+    )
+
+async def close_mongo_connection():
+    """Fecha a conexão com o MongoDB"""
+    db.client.close()

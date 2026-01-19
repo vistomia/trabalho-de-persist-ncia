@@ -1,6 +1,0 @@
-# Victor
-Rotas
-Database
-# Henrique
-Rotas
-Alambic

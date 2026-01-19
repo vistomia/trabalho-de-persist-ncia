@@ -1,44 +1,43 @@
-import fastapi
-import database.database
-from routers import user
-from routers import java
-from routers import map
-from routers import operator
-from routers import server
-from routers import server_properties
-from routers import software
-import models
-from database import database
-from sqlmodel import SQLModel, Field, create_engine, Session, select, MetaData, insert
-from models.user import User
-from models.map import Map
-from models.operator import Operator
-from models.java import Java 
-from models.server_properties import ServerProperties
-from models.software import Software
-from models.server import Server
-from datetime import datetime
-import os
-from dotenv import load_dotenv
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from routers import home, java_links, minecraft_maps, server_operators, servers, servers_properties, softwares, users
+from database import init_db, close_db
+from fastapi_pagination import add_pagination
+import time
+import logging
+import custom_logger
 
-app = fastapi.FastAPI()
-app.include_router(user.router)
-app.include_router(java.router)
-app.include_router(map.router)
-app.include_router(operator.router)
-app.include_router(server.router)
-app.include_router(server_properties.router)
-app.include_router(software.router)
+logger = logging.getLogger(__name__)
 
-load_dotenv()
-db = database.Database(uri=os.getenv('DATABASE_URL', 'sqlite:///data.sqlite'))
-engine = db.get_engine()
-metadata = MetaData()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+    await close_db()
 
-SQLModel.metadata.create_all(engine)
+# FastAPI app instance
+app = FastAPI(
+    title="Alternos",
+    description="API para gerenciamento de servidores de Minecraft usando FastAPI e MongoDB",
+    version="2.0.0",
+    lifespan=lifespan)
 
-metadata.create_all(engine)
+@app.middleware("http")
+async def log_requests(request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
 
-@app.get("/")
-async def root():
-    return {"message": "hello"}
+    logger.info(await custom_logger.middle_logger(request, response, process_time))
+    return response
+
+# Incluindo rotas
+app.include_router(home.router)
+app.include_router(users.router)
+app.include_router(java_links.router)
+app.include_router(minecraft_maps.router)
+app.include_router(server_operators.router)
+app.include_router(servers.router)
+app.include_router(servers_properties.router)
+app.include_router(softwares.router)
+add_pagination(app)
